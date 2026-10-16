@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>AnchorPoint.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M13.972 12.43 L13.972 8.972 L18.028 8.972 L18.028 12.43 L23.108 23.754 L22.013 24.246 L16.981 13.028 L15.019 13.028 L9.987 24.246 L8.892 23.754 Z" fill="#000000"/>
+    <path d="M14.972 9.972 L17.028 9.972 L17.028 12.028 L14.972 12.028 Z" fill="#ffffff"/>
+    <path id="hotspot" d="M16.25 11 C16.25 11.138 16.138 11.25 16 11.25 C15.862 11.25 15.75 11.138 15.75 11 C15.75 10.862 15.862 10.75 16 10.75 C16.138 10.75 16.25 10.862 16.25 11 Z" fill="#ff0000"/>
+  </g>
+</svg>

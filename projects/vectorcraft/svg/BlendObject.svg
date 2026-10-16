@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>BlendObject.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M3 12 L10 12" fill="none" stroke="#000000" stroke-width="1.2"/>
+    <path d="M14 12 L21 12" fill="none" stroke="#000000" stroke-width="1.2"/>
+    <path d="M12 3 L12 10" fill="none" stroke="#000000" stroke-width="1.2"/>
+    <path d="M12 14 L12 21" fill="none" stroke="#000000" stroke-width="1.2"/>
+    <path id="hotspot" d="M12.25 12 C12.25 12.138 12.138 12.25 12 12.25 C11.862 12.25 11.75 12.138 11.75 12 C11.75 11.862 11.862 11.75 12 11.75 C12.138 11.75 12.25 11.862 12.25 12 Z" fill="#ff0000"/>
+    <path d="M20.845 20.992 L24.663 20.992 L24.663 24.811 L20.845 24.811 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+  </g>
+</svg>

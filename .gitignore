@@ -1,0 +1,7 @@
+/target
+projects/*/PREVIEW.html
+projects/*/.cursorcraft/pull-from
+projects/*/.cursorcraft/seeds-tmp/
+/.claude/
+*.code-workspace
+.cursorcraft-project

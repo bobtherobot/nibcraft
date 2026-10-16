@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>Move.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="glyph" d="M4.345 18.917 L4.346 4.801 L14.652 14.446 L10.008 14.96 L12.726 21.228 L10.613 22.145 L7.894 15.877 Z" fill="#000000" stroke="#1b1818" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M4.5 4 C4.5 4.276 4.276 4.5 4 4.5 C3.724 4.5 3.5 4.276 3.5 4 C3.5 3.724 3.724 3.5 4 3.5 C4.276 3.5 4.5 3.724 4.5 4 Z" fill="#ff0000"/>
+    <g>
+      <path d="M23.737 22.048 L23.737 16.048" fill="none" stroke="#000000" stroke-width="0.7"/>
+      <path d="M23.421 15.975 L24.052 15.975 L23.737 15.582 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+      <path d="M24.052 22.222 L23.421 22.222 L23.737 22.615 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    </g>
+    <g>
+      <path d="M20.787 19.098 L26.787 19.098" fill="none" stroke="#000000" stroke-width="0.7"/>
+      <path d="M26.86 18.783 L26.86 19.414 L27.253 19.098 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+      <path d="M20.613 19.414 L20.613 18.783 L20.22 19.098 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    </g>
+  </g>
+</svg>

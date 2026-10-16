@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>Pencil.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="cone" d="M5.144 26.935 L5.066 26.854 L7.498 21.67 L8.044 21.505 L10.495 24.012 L10.33 24.502 Z" fill="#ffffff" stroke="#000000" stroke-width="0.9"/>
+    <path id="lead" d="M5 27 L5.91 24.985 L7.015 26.09 Z" fill="#000000"/>
+    <path id="hotspot" d="M5.25 27 C5.25 27.138 5.138 27.25 5 27.25 C4.862 27.25 4.75 27.138 4.75 27 C4.75 26.862 4.862 26.75 5 26.75 C5.138 26.75 5.25 26.862 5.25 27 Z" fill="#ff0000"/>
+    <path id="body" d="M16.103 13.044 L18.956 15.897 L10.715 24.138 L7.862 21.285 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M16.704 12.445 L18.285 10.864 C18.724 10.426 19.435 10.426 19.873 10.864 L21.138 12.13 C21.576 12.568 21.576 13.278 21.138 13.718 L19.558 15.298 Z" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+  </g>
+</svg>

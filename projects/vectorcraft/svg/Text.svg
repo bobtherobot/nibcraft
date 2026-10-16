@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>Text.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M14.557 18.95 L17.443 18.95 L17.443 19.05 L14.557 19.05 Z" fill="#ffffff" stroke="#000000" stroke-width="1.1" stroke-miterlimit="10"/>
+    <path d="M16.05 8.576 L16.05 23.922 L15.95 23.922 L15.95 8.576 Z" fill="#ffffff" stroke="#000000" stroke-width="1.1" stroke-miterlimit="10"/>
+    <path d="M13.54 7.95 L18.46 7.95 L18.46 8.05 L13.54 8.05 Z" fill="#ffffff" stroke="#000000" stroke-width="1.1" stroke-miterlimit="10"/>
+    <path d="M13.54 24 L18.46 24 L18.46 24.1 L13.54 24.1 Z" fill="#ffffff" stroke="#000000" stroke-width="1.1" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M16.25 19 C16.25 19.138 16.138 19.25 16 19.25 C15.862 19.25 15.75 19.138 15.75 19 C15.75 18.862 15.862 18.75 16 18.75 C16.138 18.75 16.25 18.862 16.25 19 Z" fill="#ff0000"/>
+  </g>
+</svg>

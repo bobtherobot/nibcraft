@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>SymbolScreener.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="solid" d="M6 6 L18 6 L18 18 L6 18 Z" fill="#000000"/>
+    <path id="screen" d="M12 12 L26 12 L26 26 L12 26 Z" fill="#ffffff" stroke="#000000"/>
+  </g>
+  <g id="Layer_2" data-name="Layer 2">
+    <path d="M13.721 13.766 L14.869 13.766 L14.869 14.927 L13.721 14.927 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M13.721 18.408 L14.869 18.408 L14.869 19.568 L13.721 19.568 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M13.721 23.05 L14.869 23.05 L14.869 24.21 L13.721 24.21 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M16.017 16.087 L17.165 16.087 L17.165 17.248 L16.017 17.248 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M16.017 20.729 L17.165 20.729 L17.165 21.889 L16.017 21.889 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M18.358 13.766 L19.506 13.766 L19.506 14.927 L18.358 14.927 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M22.995 13.766 L24.143 13.766 L24.143 14.927 L22.995 14.927 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M18.358 18.408 L19.506 18.408 L19.506 19.568 L18.358 19.568 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M22.995 18.408 L24.143 18.408 L24.143 19.568 L22.995 19.568 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M18.358 23.05 L19.506 23.05 L19.506 24.21 L18.358 24.21 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M22.995 23.05 L24.143 23.05 L24.143 24.21 L22.995 24.21 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M20.609 16.087 L21.757 16.087 L21.757 17.248 L20.609 17.248 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M20.609 20.729 L21.757 20.729 L21.757 21.889 L20.609 21.889 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+  </g>
+  <g id="Layer_3" data-name="Layer 3">
+    <path id="hotspot" d="M16.25 16 C16.25 16.138 16.138 16.25 16 16.25 C15.862 16.25 15.75 16.138 15.75 16 C15.75 15.862 15.862 15.75 16 15.75 C16.138 15.75 16.25 15.862 16.25 16 Z" fill="#ff0000"/>
+  </g>
+</svg>

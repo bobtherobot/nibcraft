@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>Slice.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="hotspot" d="M7.682 23.321 C7.682 23.459 7.57 23.571 7.432 23.571 C7.294 23.571 7.182 23.459 7.182 23.321 C7.182 23.183 7.294 23.071 7.432 23.071 C7.57 23.071 7.682 23.183 7.682 23.321 Z" fill="#ff0000"/>
+    <path d="M20.363 16.391 L14.935 21.556 L8.099 22.953 L17.343 13.242 Z" fill="#ffffff" stroke="#000000" stroke-width="0.7" stroke-miterlimit="10"/>
+    <path d="M22.782 6.888 L16.853 12.752 L20.869 16.939 L26.599 10.922 Z" fill="#000000" stroke="#000000" stroke-width="0.7" stroke-miterlimit="10"/>
+  </g>
+</svg>

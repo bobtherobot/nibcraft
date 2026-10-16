@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>ReshapeSegment.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="glyph" d="M4.345 18.917 L4.346 4.801 L14.652 14.446 L10.008 14.96 L12.726 21.228 L10.613 22.145 L7.894 15.877 Z" fill="#000000" stroke="#1b1818" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M4.5 4 C4.5 4.276 4.276 4.5 4 4.5 C3.724 4.5 3.5 4.276 3.5 4 C3.5 3.724 3.724 3.5 4 3.5 C4.276 3.5 4.5 3.724 4.5 4 Z" fill="#ff0000"/>
+    <path d="M20.801 23.306 C20.801 19.459 23.92 16.34 27.767 16.34 L27.767 16.568 C24.046 16.568 21.029 19.585 21.029 23.306 Z" fill="#000000" stroke="#000000" stroke-width="1.2" stroke-miterlimit="10"/>
+  </g>
+</svg>

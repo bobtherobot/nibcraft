@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>Paintbrush.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="ferrule" d="M12.812 15.788 L15.336 17.677 L12.22 21.892 L9.771 19.722 Z" fill="#ffffff" stroke="#000000"/>
+    <path id="handle" d="M12.812 15.788 L15.336 17.677 L21.357 8.558 C21.717 8.111 21.569 7.623 21.233 7.335 C20.864 7.018 20.269 6.943 19.873 7.435 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M5.25 27 C5.25 27.138 5.138 27.25 5 27.25 C4.862 27.25 4.75 27.138 4.75 27 C4.75 26.862 4.862 26.75 5 26.75 C5.138 26.75 5.25 26.862 5.25 27 Z" fill="#ff0000"/>
+    <path id="bristles" d="M5 27 C7.755 25.013 4.592 21.735 9.28 19.722 L12.392 22.019 C12.008 26.419 8.912 26.75 5 27 Z" fill="#000000"/>
+  </g>
+</svg>

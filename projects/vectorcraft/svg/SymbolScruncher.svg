@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>SymbolScruncher.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M8.379 23.418 L10.8 20.998 L11.002 21.2 L8.582 23.621 Z" fill="none" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M8.582 8.379 L11.002 10.8 L10.8 11.002 L8.379 8.582 Z" fill="none" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M23.621 8.582 L21.2 11.002 L20.998 10.8 L23.418 8.379 Z" fill="none" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M23.418 23.621 L20.998 21.2 L21.2 20.998 L23.621 23.418 Z" fill="none" stroke="#000000" stroke-miterlimit="10"/>
+    <path id="symbol" d="M17.794 16 C17.794 16.991 16.991 17.794 16 17.794 C15.009 17.794 14.206 16.991 14.206 16 C14.206 15.009 15.009 14.206 16 14.206 C16.991 14.206 17.794 15.009 17.794 16 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M16.25 16 C16.25 16.138 16.138 16.25 16 16.25 C15.862 16.25 15.75 16.138 15.75 16 C15.75 15.862 15.862 15.75 16 15.75 C16.138 15.75 16.25 15.862 16.25 16 Z" fill="#ff0000"/>
+    <path d="M11.681 21.995 L10.005 20.319 L11.888 20.112 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M10.005 11.681 L11.681 10.005 L11.888 11.888 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M20.319 10.005 L21.995 11.681 L20.112 11.888 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M21.995 20.319 L20.319 21.995 L20.112 20.112 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+  </g>
+</svg>

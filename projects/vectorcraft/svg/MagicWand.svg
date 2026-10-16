@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>MagicWand.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path id="wand" d="M9.5 9.5 L25 25" fill="#000000" stroke="#000000" stroke-width="2.75"/>
+    <path id="wand-tip" d="M10.25 10.25 L12.75 12.75" fill="#000000" stroke="#ffffff" stroke-width="1.25"/>
+    <path id="sparkle" d="M6 5.369 L6.129 5.871 L6.631 6 L6.129 6.129 L6 6.631 L5.871 6.129 L5.369 6 L5.871 5.871 Z" fill="#000000" stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M6.25 6 C6.25 6.138 6.138 6.25 6 6.25 C5.862 6.25 5.75 6.138 5.75 6 C5.75 5.862 5.862 5.75 6 5.75 C6.138 5.75 6.25 5.862 6.25 6 Z" fill="#ff0000"/>
+    <path d="M7.068 14.614 L4.432 17.25" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M14.759 2.279 L12.123 4.915" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M4.432 14.614 L7.068 17.25" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M12.123 2.279 L14.759 4.915" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+  </g>
+</svg>

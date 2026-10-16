@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>Scissors.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M7.881 11.573 L7.881 4.427 L8.119 4.427 L8.119 11.573 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M4.427 8.119 L4.427 7.881 L11.573 7.881 L11.573 8.119 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M8.5 8 C8.5 8.276 8.276 8.5 8 8.5 C7.724 8.5 7.5 8.276 7.5 8 C7.5 7.724 7.724 7.5 8 7.5 C8.276 7.5 8.5 7.724 8.5 8 Z" fill="#ff0000"/>
+    <path id="right-ring" d="M12.874 16.48 C12.161 15.963 12.002 14.967 12.518 14.254 C13.034 13.541 14.03 13.381 14.743 13.897 C15.457 14.414 15.616 15.41 15.1 16.123 C14.584 16.836 13.588 16.996 12.874 16.48 Z" fill="none" stroke="#000000"/>
+    <path id="right-ring-2" data-name="right-ring" d="M13.058 19.961 C12.353 20.488 12.209 21.486 12.736 22.191 C13.262 22.897 14.261 23.041 14.966 22.514 C15.671 21.987 15.816 20.989 15.289 20.284 C14.762 19.578 13.764 19.434 13.058 19.961 Z" fill="none" stroke="#000000"/>
+    <path d="M24.75 22.74 L14.975 16.425 L15.348 15.91 L24.787 22.743 Z" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M24.838 13.521 L15.16 19.984 L15.54 20.492 L24.875 13.518 Z" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+  </g>
+</svg>

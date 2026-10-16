@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>WidthPoint.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <g>
+      <path d="M19.712 22.861 L19.557 22.706 L19.402 22.861 L19.557 23.016 Z" fill="#000000" stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+      <path d="M27.526 15.046 L27.372 14.891 L27.216 15.046 L27.372 15.201 Z" fill="#000000" stroke="#000000" stroke-width="2" stroke-miterlimit="10"/>
+      <path d="M19.556 22.861 L27.179 15.239" fill="none" stroke="#000000" stroke-width="0.5" stroke-miterlimit="10"/>
+    </g>
+    <path id="glyph" d="M4.326 18.868 L4.326 4.753 L14.633 14.397 L9.988 14.911 L12.706 21.179 L10.593 22.096 L7.875 15.828 Z" fill="#ffffff" stroke="#000000" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M4.5 4 C4.5 4.276 4.276 4.5 4 4.5 C3.724 4.5 3.5 4.276 3.5 4 C3.5 3.724 3.724 3.5 4 3.5 C4.276 3.5 4.5 3.724 4.5 4 Z" fill="#ff0000"/>
+    <path d="M17.975 18.869 C21.693 18.869 21.583 16.661 23.717 16.661 C25.85 16.661 25.74 18.869 29.459 18.869 L29.459 18.869 L29.459 19.231 C25.74 19.231 25.85 21.439 23.717 21.439 C21.583 21.439 21.693 19.231 17.975 19.231 Z" fill="#000000"/>
+  </g>
+</svg>

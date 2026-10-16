@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
+  <title>ResizeH.svg</title>
+  <g id="Layer_1" data-name="Layer 1">
+    <path d="M10.243 16 L21.757 16" fill="none" stroke="#000000" stroke-width="1.3"/>
+    <path d="M10.167 17.185 L10.167 14.815 L8.689 16 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    <path d="M21.833 17.185 L21.833 14.815 L23.311 16 Z" fill="#1b1818" stroke="#000000" stroke-miterlimit="10"/>
+    <path id="hotspot" d="M16.25 16 C16.25 16.138 16.138 16.25 16 16.25 C15.862 16.25 15.75 16.138 15.75 16 C15.75 15.862 15.862 15.75 16 15.75 C16.138 15.75 16.25 15.862 16.25 16 Z" fill="#ff0000"/>
+  </g>
+</svg>
