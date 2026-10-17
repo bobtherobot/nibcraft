@@ -203,4 +203,4 @@ cargo test
 
 `testdata/round-trip-checker.svg` is the round-trip check: it redraws `cursors.rs`'s `pen()` nib. Its glyph matches the hand-written one, except that the stem's halo no longer cuts into the nib; `cargo test` checks that it still converts to `pen()`'s numbers.
 
-Licence: MIT OR Apache-2.0, like VectorCraft.
+Licence: MIT OR Apache-2.0, at your option, like VectorCraft (`LICENSE-MIT`, `LICENSE-APACHE`).
