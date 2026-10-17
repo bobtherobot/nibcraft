@@ -1,13 +1,16 @@
 # VectorCraft cursors
 
-The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.11.0 (58b3d3ef, 2026-10-15)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
+The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (0d9fc1b1, 2026-10-17)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
 
 Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.
 
-74 cursors: 67 drawn, 7 to draw, 0 to fix.
+77 cursors: 67 drawn, 10 to draw, 0 to fix.
 
 ## To draw
 
+- PenDrawing
+- EyedropperType
+- Mesh
 - BlobBrush
 - Eraser
 - PathEraser
@@ -97,7 +100,6 @@ Shown when:
 - Reshape over a path or while dragging.
 - Inside the Free Transform and Crop Image boxes.
 - Puppet Warp over a pin.
-- The Mesh tool over a mesh point or handle.
 - The Artboard tool inside an artboard.
 - The Gradient tool over the annotator's handles and during most gradient drags.
 - The Perspective Grid and Perspective Selection over plane widgets and handles.
@@ -138,13 +140,23 @@ Look: Arrow with a type badge (a letter T).
 ### Pen · drawn
 
 Shown when:
-- The Pen tool by default: starting a path or placing the next point.
+- The Pen tool where a click starts a new path.
 - The Curvature tool away from its points.
 - With Use Precise Cursors on, the crosshair shows instead.
 
 Hotspot: The nib's tip.
 
 Look: A pen nib. Every Pen-family cursor is this nib with a different badge.
+
+### PenDrawing · to draw
+
+Shown when:
+- The Pen tool while a path is being drawn, where a click adds the path's next point.
+- The close, join and convert badges still show over the points they act on.
+
+Hotspot: The nib's tip.
+
+Look: The Pen nib with no badge.
 
 ### PenAdd · drawn
 
@@ -391,11 +403,23 @@ Look: The ZoomIn magnifier with a minus in its lens.
 ### Eyedropper · drawn
 
 Shown when:
-- The Eyedropper tool, whatever the modifier keys. With Use Precise Cursors on, the crosshair shows instead.
+- The Eyedropper tool away from type, whatever the modifier keys.
+- Over type the Eyedropper shows EyedropperType.
+- With Use Precise Cursors on, the crosshair shows instead.
 
 Hotspot: The pipette's tip.
 
 Look: A pipette.
+
+### EyedropperType · to draw
+
+Shown when:
+- The Eyedropper tool over type, where a click samples the type's attributes.
+- With Use Precise Cursors on, the crosshair shows instead.
+
+Hotspot: The pipette's tip.
+
+Look: The Eyedropper pipette with a small T.
 
 ### AddStop · drawn
 
@@ -421,9 +445,20 @@ Look: Arrow with a minus badge.
 
 Shown when:
 - The Mesh tool over a mesh or a path, off a mesh point: a click adds a mesh point (turning a path into a mesh).
-- Elsewhere the Mesh tool shows PenDelete (Alt over a mesh point) and Move (over a point or handle).
+- Elsewhere the Mesh tool shows Mesh, or PenDelete with Alt over a mesh point.
 
 Hotspot: Where the mesh point goes.
+
+### Mesh · to draw
+
+Shown when:
+- The Mesh tool over a mesh point or handle, where a drag moves it.
+- The Mesh tool away from any mesh or path, where a click adds nothing.
+- With Use Precise Cursors on, the crosshair shows instead.
+
+Hotspot: The same point as MeshAdd's.
+
+Look: MeshAdd without its plus.
 
 ### LivePaintBucket · drawn
 
