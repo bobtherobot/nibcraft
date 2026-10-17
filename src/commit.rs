@@ -68,7 +68,7 @@ mod tests {
 
     /// A fresh git repository under the system temp dir, with a cursor folder and a file outside it.
     fn repo(name: &str) -> PathBuf {
-        let r = std::env::temp_dir().join(format!("cursorcraft-test-commit-{name}-{}", std::process::id()));
+        let r = std::env::temp_dir().join(format!("nibcraft-test-commit-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&r);
         std::fs::create_dir_all(r.join("svg-x")).unwrap();
         for args in [&["init", "--quiet"][..], &["config", "user.name", "Test"], &["config", "user.email", "test@example.com"], &["config", "commit.gpgsign", "false"]] {
@@ -100,7 +100,7 @@ mod tests {
 
     #[test]
     fn outside_a_repository_nothing_happens() {
-        let d = std::env::temp_dir().join(format!("cursorcraft-test-commit-norepo-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("nibcraft-test-commit-norepo-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         assert_eq!(commit(&d, "x").unwrap(), Outcome::NotARepo);

@@ -8,7 +8,7 @@
 //!                        cursor nobody has drawn yet (rewritten by every pull)
 //!     CURSORS.md         what the app needs, written by `pull` and `check`: never edit it
 //!     DESIGNER_NOTES.md  the designer's notes for the app's developers
-//!     .cursorcraft/      cursorcraft's own files, never edited by hand:
+//!     .nibcraft/      nibcraft's own files, never edited by hand:
 //!         cursors.toml   the app's cursor list as last pulled (committed, so `check` works anywhere)
 //!         handoff        what the last `ready` handed over (committed)
 //!         pull-from      where the app's checkout is on this machine (local, gitignored)
@@ -19,10 +19,10 @@ use std::path::{Path, PathBuf};
 pub const PROJECTS_DIR: &str = "projects";
 
 /// The file in the working directory naming the current project. Local, so gitignored.
-pub const CURRENT_FILE: &str = ".cursorcraft-project";
+pub const CURRENT_FILE: &str = ".nibcraft-project";
 
-/// The folder in each project holding cursorcraft's own files.
-pub const STATE_DIR: &str = ".cursorcraft";
+/// The folder in each project holding nibcraft's own files.
+pub const STATE_DIR: &str = ".nibcraft";
 
 /// A project's folder and the files in it.
 pub struct Project {
@@ -92,7 +92,7 @@ pub fn current(root: &Path) -> Option<String> {
 pub fn set(root: &Path, name: &str) -> Result<(), String> {
     let name = clean(name);
     if !Project::at(root, name).dir.is_dir() {
-        return Err(format!("{name}: no such project in {PROJECTS_DIR}/ (`cursorcraft pull PATH/TO/APP` creates one)"));
+        return Err(format!("{name}: no such project in {PROJECTS_DIR}/ (`nibcraft pull PATH/TO/APP` creates one)"));
     }
     std::fs::write(root.join(CURRENT_FILE), format!("{name}\n")).map_err(|e| format!("{CURRENT_FILE}: {e}"))
 }
@@ -107,12 +107,12 @@ fn clean(name: &str) -> &str {
 pub fn resolve(root: &Path, args: &[String]) -> Result<Project, String> {
     let name = match args {
         [name] => clean(name).to_string(),
-        [] => current(root).ok_or_else(|| "no project chosen: name one, or pick one with `cursorcraft use NAME` (`cursorcraft projects` lists them)".to_string())?,
+        [] => current(root).ok_or_else(|| "no project chosen: name one, or pick one with `nibcraft use NAME` (`nibcraft projects` lists them)".to_string())?,
         _ => return Err("expected at most one project".into()),
     };
     let p = Project::at(root, &name);
     if !p.dir.is_dir() {
-        return Err(format!("{name}: no such project in {PROJECTS_DIR}/ (`cursorcraft pull PATH/TO/APP` creates one)"));
+        return Err(format!("{name}: no such project in {PROJECTS_DIR}/ (`nibcraft pull PATH/TO/APP` creates one)"));
     }
     Ok(p)
 }
@@ -123,7 +123,7 @@ pub mod tests {
 
     /// A fresh, empty directory under the system temp dir.
     pub fn root(name: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("cursorcraft-test-{name}-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("nibcraft-test-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         d
@@ -148,7 +148,7 @@ pub mod tests {
         project(&r, "a");
         project(&r, "b");
         assert_eq!(current(&r), None);
-        assert!(resolve(&r, &[]).err().unwrap().contains("cursorcraft use"));
+        assert!(resolve(&r, &[]).err().unwrap().contains("nibcraft use"));
         set(&r, "projects/b/").unwrap();
         assert_eq!(current(&r).as_deref(), Some("b"));
         assert_eq!(resolve(&r, &[]).unwrap().name, "b");

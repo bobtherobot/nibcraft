@@ -72,9 +72,9 @@ fn place(p: &Project, app: &str, m: &Manifest, dir: &Path) -> Result<(Vec<String
 }
 
 /// The seed with a comment at the top saying not to draw in it, and the same in red text at the
-/// canvas's top left, which a drawing program shows (cursorcraft never draws it: [`SEED_NOTE_ID`]).
+/// canvas's top left, which a drawing program shows (nibcraft never draws it: [`SEED_NOTE_ID`]).
 fn with_warning(svg: &str, id: &str, app: &str) -> String {
-    let warning = format!("<!-- Seed: how {app} draws {id} today. Don't draw in this file: every `cursorcraft pull` overwrites it. Copy it to {id}.svg and draw there. -->\n");
+    let warning = format!("<!-- Seed: how {app} draws {id} today. Don't draw in this file: every `nibcraft pull` overwrites it. Copy it to {id}.svg and draw there. -->\n");
     let svg = match svg.split_once('\n') {
         Some((first, rest)) if first.starts_with("<?xml") => format!("{first}\n{warning}{rest}"),
         _ => format!("{warning}{svg}"),
@@ -162,7 +162,7 @@ mod tests {
     #[test]
     fn the_command_runs_in_the_app_checkout_with_the_folder_added() {
         let p = project("seed-run");
-        // A project named by a relative path (cursorcraft runs from its own folder) still gets
+        // A project named by a relative path (nibcraft runs from its own folder) still gets
         // the drawings: the command is given the folder's absolute path.
         let p = Project { name: p.name, dir: pathdiff(&p.dir) };
         let list = format!("seeds = [\"sh\", \"-c\", \"cp seed.svg \\\"$0/Cross.svg\\\"\"]\n{LIST}");

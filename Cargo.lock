@@ -74,15 +74,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cursorcraft"
-version = "0.1.0"
-dependencies = [
- "serde",
- "toml",
- "usvg",
-]
-
-[[package]]
 name = "data-url"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -231,6 +222,15 @@ checksum = "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
 dependencies = [
  "adler2",
  "simd-adler32",
+]
+
+[[package]]
+name = "nibcraft"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "toml",
+ "usvg",
 ]
 
 [[package]]

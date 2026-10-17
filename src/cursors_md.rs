@@ -22,8 +22,8 @@ pub fn render(app: &str, stamp: Option<&str>, m: &Manifest, r: &Report) -> Strin
 
     let mut out = format!("# {app} cursors\n\n");
     let from = stamp.map(|s| format!(" (pulled from {s})")).unwrap_or_default();
-    out.push_str(&format!("The cursors {app} needs, from its cursor list{from}. Don't edit this file: cursorcraft rewrites it on every `pull` and `check`. Notes for {app}'s developers go in DESIGNER_NOTES.md.\n\n"));
-    out.push_str("Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in cursorcraft's top folder) first.\n\n");
+    out.push_str(&format!("The cursors {app} needs, from its cursor list{from}. Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for {app}'s developers go in DESIGNER_NOTES.md.\n\n"));
+    out.push_str("Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.\n\n");
     out.push_str(&format!("{total} cursors: {} drawn, {missing} to draw, {fix} to fix.\n", total - missing - fix));
 
     for (kind, title) in [(TodoKind::Missing, "To draw"), (TodoKind::Fix, "To fix")] {

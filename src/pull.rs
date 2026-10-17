@@ -1,4 +1,4 @@
-//! `cursorcraft pull [PATH/TO/APP] [--no-seeds]`: copy the app's cursor list into its project,
+//! `nibcraft pull [PATH/TO/APP] [--no-seeds]`: copy the app's cursor list into its project,
 //! creating the project the first time, and write the seeds ([`crate::seeds`]). Safe to run at any
 //! time: it never touches a drawing.
 
@@ -32,7 +32,7 @@ pub fn pull(root: &Path, args: &[String]) -> Result<Pulled, String> {
     let current = project::current(root).map(|n| Project::at(root, &n));
     let app_dir = match args[..] {
         [path] => PathBuf::from(path.trim_end_matches('/')),
-        [] => current.and_then(|p| p.app_dir()).ok_or("pull needs the path to the app's checkout the first time, e.g. `cursorcraft pull ../vectorcraft`")?,
+        [] => current.and_then(|p| p.app_dir()).ok_or("pull needs the path to the app's checkout the first time, e.g. `nibcraft pull ../vectorcraft`")?,
         _ => return Err(format!("pull takes one path, to the app's checkout, and optionally {NO_SEEDS}")),
     };
     let app_dir = app_dir.canonicalize().map_err(|e| format!("{}: {e}", app_dir.display()))?;

@@ -1,21 +1,21 @@
-//! cursorcraft: turns cursor drawings (SVG) into Rust glyph data for an app such as VectorCraft.
+//! nibcraft: turns cursor drawings (SVG) into Rust glyph data for an app such as VectorCraft.
 //! The app decides which cursors exist (its cursor list); designers draw them here.
 //!
-//!     cursorcraft pull [PATH/TO/APP] [--no-seeds]
+//!     nibcraft pull [PATH/TO/APP] [--no-seeds]
 //!                                      get the app's cursor list into projects/<app>/ (creates the
 //!                                      project the first time; later the path is remembered), and
 //!                                      seeds: how the app draws cursors nobody has drawn yet
 //!                                      (builds the app; --no-seeds skips that)
-//!     cursorcraft check [PROJECT]      preview the drawings as the app will show them, list what's
+//!     nibcraft check [PROJECT]      preview the drawings as the app will show them, list what's
 //!                                      left to draw, and refresh CURSORS.md
-//!     cursorcraft ready [PROJECT]      check, then hand over: commit the project and print the
+//!     nibcraft ready [PROJECT]      check, then hand over: commit the project and print the
 //!                                      command an app developer runs to bring the drawings in
-//!     cursorcraft projects             list the projects, marking the current one
-//!     cursorcraft use PROJECT          make a project the current one
-//!     cursorcraft glyphs PROJECT ID…   the app's sync: JSON with the generated `const` of each
+//!     nibcraft projects             list the projects, marking the current one
+//!     nibcraft use PROJECT          make a project the current one
+//!     nibcraft glyphs PROJECT ID…   the app's sync: JSON with the generated `const` of each
 //!                                      drawn id, the missing ones, errors and designer notes
-//!     cursorcraft gen FILE.svg [more.svg…]   print a `const` per SVG
-//!     cursorcraft runtime              print the `Glyph` types and `draw_glyph`
+//!     nibcraft gen FILE.svg [more.svg…]   print a `const` per SVG
+//!     nibcraft runtime              print the `Glyph` types and `draw_glyph`
 //!
 //! check and ready work on the project named, else the current one.
 //!
@@ -92,7 +92,7 @@ fn check_project(p: &Project) -> Result<Checked, String> {
     let app = pulled.manifest.as_ref().ok().and_then(|m| m.app.clone()).unwrap_or_else(|| p.name.clone());
     let mut advice = vec![];
     if pull::stale(p) == Some(true) {
-        advice.push(format!("{app}'s cursor list has changed since your last pull: run `cursorcraft pull` to get it."));
+        advice.push(format!("{app}'s cursor list has changed since your last pull: run `nibcraft pull` to get it."));
     }
     if let Some(w) = std::fs::read_to_string(p.notes()).ok().as_deref().and_then(notes::warning) {
         advice.push(w);
@@ -178,7 +178,7 @@ fn precheck(args: &[String]) -> Result<String, String> {
         checked.text.push_str(&note);
     }
     if checked.report.problems.is_empty() {
-        Ok(format!("{}\nNo problems. When you're done, run `cursorcraft ready`.\n", checked.text))
+        Ok(format!("{}\nNo problems. When you're done, run `nibcraft ready`.\n", checked.text))
     } else {
         Err(format!("check found problems.\n{}", checked.text))
     }
@@ -190,7 +190,7 @@ fn ready(args: &[String]) -> Result<String, String> {
     let p = project::resolve(Path::new("."), args)?;
     let checked = check_project(&p)?;
     if !checked.report.problems.is_empty() {
-        return Err(format!("not ready: fix these, then run `cursorcraft ready` again.\n{}", checked.text));
+        return Err(format!("not ready: fix these, then run `nibcraft ready` again.\n{}", checked.text));
     }
     let record_path = p.handoff();
     let previous = match std::fs::read_to_string(&record_path) {
@@ -219,7 +219,7 @@ fn projects() -> Result<String, String> {
     let root = Path::new(".");
     let names = project::list(root);
     if names.is_empty() {
-        return Err("no projects yet: `cursorcraft pull PATH/TO/APP` creates one".into());
+        return Err("no projects yet: `nibcraft pull PATH/TO/APP` creates one".into());
     }
     let now = project::current(root);
     let mut out = String::new();
@@ -228,7 +228,7 @@ fn projects() -> Result<String, String> {
         out.push_str(&format!("{mark} {n}\n"));
     }
     if now.is_none() {
-        out.push_str("\nNo current project: pick one with `cursorcraft use PROJECT`.\n");
+        out.push_str("\nNo current project: pick one with `nibcraft use PROJECT`.\n");
     }
     Ok(out)
 }
@@ -236,7 +236,7 @@ fn projects() -> Result<String, String> {
 /// `use PROJECT`: make it the current project.
 fn use_project(args: &[String]) -> Result<String, String> {
     let [name] = args else {
-        return Err("use needs one project, e.g. `cursorcraft use vectorcraft`".into());
+        return Err("use needs one project, e.g. `nibcraft use vectorcraft`".into());
     };
     project::set(Path::new("."), name)?;
     Ok(format!("Current project: {}. pull, check and ready now use it when none is named.\n", project::current(Path::new(".")).unwrap_or_default()))
@@ -245,14 +245,14 @@ fn use_project(args: &[String]) -> Result<String, String> {
 /// `glyphs PROJECT ID…`: what the app's sync reads. Writes no files.
 fn glyphs_cmd(args: &[String]) -> Result<String, String> {
     let Some((name, ids)) = args.split_first() else {
-        return Err("glyphs needs a project and the cursor ids to generate, e.g. `cursorcraft glyphs vectorcraft Pen PenAdd`".into());
+        return Err("glyphs needs a project and the cursor ids to generate, e.g. `nibcraft glyphs vectorcraft Pen PenAdd`".into());
     };
     let root = Path::new(".");
     let p = project::resolve(root, std::slice::from_ref(name))?;
     glyphs::answer(&p, ids, &glyphs::source(root, &p))
 }
 
-const USAGE: &str = "usage: cursorcraft pull [PATH/TO/APP] [--no-seeds] | check [PROJECT] | ready [PROJECT] | projects | use PROJECT | glyphs PROJECT ID… | gen FILE.svg… | runtime";
+const USAGE: &str = "usage: nibcraft pull [PATH/TO/APP] [--no-seeds] | check [PROJECT] | ready [PROJECT] | projects | use PROJECT | glyphs PROJECT ID… | gen FILE.svg… | runtime";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -274,7 +274,7 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("cursorcraft: {e}");
+            eprintln!("nibcraft: {e}");
             ExitCode::FAILURE
         }
     }

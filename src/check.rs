@@ -96,21 +96,21 @@ pub struct Pulled {
     pub stamp: Option<String>,
 }
 
-/// The stamp `pull` writes as the first line of `.cursorcraft/cursors.toml`.
+/// The stamp `pull` writes as the first line of `.nibcraft/cursors.toml`.
 const STAMP_PREFIX: &str = "# Pulled from ";
-const STAMP_SUFFIX: &str = ". Don't edit: `cursorcraft pull` rewrites this file.";
+const STAMP_SUFFIX: &str = ". Don't edit: `nibcraft pull` rewrites this file.";
 
-/// The first line of `.cursorcraft/cursors.toml`, saying where the list came from (`VectorCraft 0.10.0 (…)`).
+/// The first line of `.nibcraft/cursors.toml`, saying where the list came from (`VectorCraft 0.10.0 (…)`).
 pub fn stamp_line(stamp: &str) -> String {
     format!("{STAMP_PREFIX}{stamp}{STAMP_SUFFIX}\n")
 }
 
-/// `.cursorcraft/cursors.toml`'s text without its stamp line: the app's list as it was pulled.
+/// `.nibcraft/cursors.toml`'s text without its stamp line: the app's list as it was pulled.
 pub fn without_stamp(text: &str) -> &str {
     if text.starts_with(STAMP_PREFIX) { text.split_once('\n').map_or("", |(_, rest)| rest) } else { text }
 }
 
-/// Read the project's `.cursorcraft/cursors.toml`.
+/// Read the project's `.nibcraft/cursors.toml`.
 pub fn pulled(p: &Project) -> Pulled {
     match std::fs::read_to_string(p.manifest()) {
         Ok(text) => {
@@ -118,7 +118,7 @@ pub fn pulled(p: &Project) -> Pulled {
             Pulled { manifest: Manifest::parse(&text), stamp }
         }
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            Pulled { manifest: Err(format!("no cursor list yet: run `cursorcraft pull PATH/TO/{}` once", p.name)), stamp: None }
+            Pulled { manifest: Err(format!("no cursor list yet: run `nibcraft pull PATH/TO/{}` once", p.name)), stamp: None }
         }
         Err(e) => Pulled { manifest: Err(format!("{}: {e}", p.manifest().display())), stamp: None },
     }
@@ -212,7 +212,7 @@ mod tests {
         let r = crate::project::tests::root("pulled");
         let p = Project::at(&r, "v");
         std::fs::create_dir_all(p.state_dir()).unwrap();
-        assert!(pulled(&p).manifest.err().unwrap().contains("cursorcraft pull"));
+        assert!(pulled(&p).manifest.err().unwrap().contains("nibcraft pull"));
         std::fs::write(p.manifest(), format!("{}{LIST}", stamp_line("VectorCraft 0.10.0 (abc1234, 2026-10-13)"))).unwrap();
         let got = pulled(&p);
         assert_eq!(got.manifest.unwrap().cursor.len(), 4);

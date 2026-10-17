@@ -1,7 +1,7 @@
 /target
 projects/*/PREVIEW.html
-projects/*/.cursorcraft/pull-from
-projects/*/.cursorcraft/seeds-tmp/
+projects/*/.nibcraft/pull-from
+projects/*/.nibcraft/seeds-tmp/
 /.claude/
 *.code-workspace
-.cursorcraft-project
+.nibcraft-project

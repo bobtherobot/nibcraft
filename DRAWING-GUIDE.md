@@ -1,7 +1,7 @@
 # Drawing guide
 
 How to draw cursor SVGs that render the way they look in your editor. VectorCraft doesn't show
-your SVG as-is: cursorcraft converts it to shapes, and VectorCraft draws those with a few rules of
+your SVG as-is: nibcraft converts it to shapes, and VectorCraft draws those with a few rules of
 its own. Draw with those rules in mind and what you see is what you get.
 
 ## How a cursor is drawn

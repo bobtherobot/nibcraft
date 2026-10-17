@@ -1,8 +1,8 @@
 # VectorCraft cursors
 
-The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.11.0 (58b3d3ef, 2026-10-15)). Don't edit this file: cursorcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
+The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.11.0 (58b3d3ef, 2026-10-15)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
 
-Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in cursorcraft's top folder) first.
+Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.
 
 74 cursors: 67 drawn, 7 to draw, 0 to fix.
 

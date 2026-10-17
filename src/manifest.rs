@@ -1,6 +1,6 @@
 //! An app's cursor manifest: the cursors it needs, what each is for and where its hotspot is. The
 //! app owns it (VectorCraft: `crates/tools/src/cursors.toml`); `pull` copies it into the project as
-//! `.cursorcraft/cursors.toml`, and designers draw what it lists. Nothing here decides what a cursor is for.
+//! `.nibcraft/cursors.toml`, and designers draw what it lists. Nothing here decides what a cursor is for.
 
 use serde::Deserialize;
 

@@ -5,11 +5,11 @@ use crate::preview::Card;
 use std::collections::HashMap;
 use std::path::Path;
 
-/// The record of the last handoff (in the project's `.cursorcraft/handoff`): one `id fingerprint`
+/// The record of the last handoff (in the project's `.nibcraft/handoff`): one `id fingerprint`
 /// line per drawn cursor. `ready` commits it, so "since the last handoff" is the same everywhere.
 /// Older records (`File.svg svg-fingerprint description-fingerprint`) still read.
 pub fn record(cards: &[Card]) -> String {
-    let mut out = String::from("# Written by `cursorcraft ready`; don't edit. id fingerprint\n");
+    let mut out = String::from("# Written by `nibcraft ready`; don't edit. id fingerprint\n");
     for c in cards {
         out.push_str(&format!("{} {}\n", id(&c.file), c.fingerprint));
     }
@@ -73,8 +73,8 @@ impl Changes {
 }
 
 /// What to tell the designer: the changes, then the command to run in the app's checkout.
-/// `cursorcraft` is cursorcraft's top folder; `app_dir` the app checkout, when known.
-pub fn instructions(app: &str, cursorcraft: &Path, app_dir: Option<&Path>, cursors: usize, changes: &Changes, first: bool) -> String {
+/// `nibcraft` is nibcraft's top folder; `app_dir` the app checkout, when known.
+pub fn instructions(app: &str, nibcraft: &Path, app_dir: Option<&Path>, cursors: usize, changes: &Changes, first: bool) -> String {
     let summary = if first {
         format!("First handoff: all {cursors} drawn cursors are new.")
     } else if changes.is_empty() {
@@ -83,7 +83,7 @@ pub fn instructions(app: &str, cursorcraft: &Path, app_dir: Option<&Path>, curso
         format!("Since the last handoff:\n  {}", changes.lines().join("\n  "))
     };
     let place = app_dir.map_or_else(|| format!("in the {app} checkout"), |d| format!("in {}", d.display()));
-    format!("Ready to hand over: {cursors} drawn cursors, no problems.\n\n{summary}\n\nNext, a {app} developer runs this {place}:\n\n  cargo xtask cursors {}\n", cursorcraft.display())
+    format!("Ready to hand over: {cursors} drawn cursors, no problems.\n\n{summary}\n\nNext, a {app} developer runs this {place}:\n\n  cargo xtask cursors {}\n", nibcraft.display())
 }
 
 #[cfg(test)]
@@ -111,7 +111,7 @@ mod tests {
 
     #[test]
     fn an_old_record_with_file_names_and_description_fingerprints_still_reads() {
-        let old = "# Written by `cursorcraft ready`; don't edit. file svg-fingerprint description-fingerprint\nPen.svg 1 aaaa\nGone.svg 2 bbbb\n";
+        let old = "# Written by `nibcraft ready`; don't edit. file svg-fingerprint description-fingerprint\nPen.svg 1 aaaa\nGone.svg 2 bbbb\n";
         let c = changes(Some(old), &record(&[card("Pen.svg", "1")]));
         assert_eq!(c, Changes { removed: vec!["Gone".into()], ..Changes::default() });
     }
@@ -125,8 +125,8 @@ mod tests {
     #[test]
     fn instructions_give_the_command_to_run_in_the_app() {
         let c = Changes { new: vec!["Lasso".into()], redrawn: vec!["Pen".into()], ..Changes::default() };
-        let text = instructions("VectorCraft", Path::new("/home/me/cursorcraft"), Some(Path::new("/home/me/vectorcraft")), 45, &c, false);
-        assert!(text.contains("runs this in /home/me/vectorcraft:\n\n  cargo xtask cursors /home/me/cursorcraft\n"), "{text}");
+        let text = instructions("VectorCraft", Path::new("/home/me/nibcraft"), Some(Path::new("/home/me/vectorcraft")), 45, &c, false);
+        assert!(text.contains("runs this in /home/me/vectorcraft:\n\n  cargo xtask cursors /home/me/nibcraft\n"), "{text}");
         assert!(text.contains("New: Lasso") && text.contains("Redrawn: Pen"), "{text}");
         assert!(!text.contains("/update-cursors"), "{text}");
         let none = instructions("VectorCraft", Path::new("/x"), None, 3, &Changes::default(), false);
