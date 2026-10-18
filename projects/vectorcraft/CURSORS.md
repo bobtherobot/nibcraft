@@ -6,11 +6,10 @@ Draw each cursor as `svg/<id>.svg` from its description below, never from anothe
 
 Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of the description, from the research behind it. The higher it is, the more closely to follow the description; the lower, the more the drawing is yours, as long as it keeps the cursor's meaning and hotspot.
 
-78 cursors: 68 drawn, 10 to draw, 0 to fix, 11 changed since last pull.
+78 cursors: 69 drawn, 9 to draw, 0 to fix, 5 changed since last pull.
 
 ## To draw
 
-- PenDrawing
 - EyedropperType
 - Mesh
 - BlobBrush
@@ -25,12 +24,6 @@ Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of
 
 VectorCraft changed what these cursors must say after they were drawn. Check each drawing against its description below and redraw it where it no longer fits. A cursor leaves this list when its drawing changes; if a drawing already fits, delete its line from `.nibcraft/changed`.
 
-- PenAdd
-- PenDelete
-- PenClose
-- PenContinue
-- PenJoin
-- PenConvert
 - AnchorPoint
 - Curvature
 - Crosshair
@@ -204,7 +197,7 @@ Look: A pen nib with a small asterisk badge (a new path starts here). Every Pen-
 
 Confidence: 8/10 (follow its meaning and shape; the details are yours)
 
-### PenDrawing · to draw
+### PenDrawing · drawn
 
 Shown when:
 - The Pen tool while a path is being drawn, where a click adds the path's next point.
@@ -216,7 +209,7 @@ Look: The bare Pen nib: the Pen without its asterisk, so starting a path visibly
 
 Confidence: 8/10 (follow its meaning and shape; the details are yours)
 
-### PenAdd · changed since last pull
+### PenAdd · drawn
 
 Shown when:
 - The Pen, when no path is being drawn, over a segment of a selected path with Auto Add/Delete on and Shift up.
@@ -231,7 +224,7 @@ Look: The Pen nib with a plus badge.
 
 Confidence: 9/10 (follow the description closely)
 
-### PenDelete · changed since last pull
+### PenDelete · drawn
 
 Shown when:
 - The Pen, when no path is being drawn, over an anchor of a selected path with Auto Add/Delete on and Shift up.
@@ -245,7 +238,7 @@ Look: The Pen nib with a minus badge.
 
 Confidence: 9/10 (follow the description closely)
 
-### PenClose · changed since last pull
+### PenClose · drawn
 
 Shown when:
 - The Pen while drawing, over the first anchor once the path has two or more (a click closes it).
@@ -258,7 +251,7 @@ Look: The Pen nib with a ring badge (closing the loop).
 
 Confidence: 9/10 (follow the description closely)
 
-### PenContinue · changed since last pull
+### PenContinue · drawn
 
 Shown when:
 - The Pen, when no path is being drawn, over an end of an open path (a click continues it).
@@ -270,7 +263,7 @@ Look: The Pen nib with a slash badge.
 
 Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
-### PenJoin · changed since last pull
+### PenJoin · drawn
 
 Shown when:
 - The Pen while drawing, over an end of another open path (a click joins the two).
@@ -281,7 +274,7 @@ Look: The Pen nib with a badge showing a line running into an end point.
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
-### PenConvert · changed since last pull
+### PenConvert · drawn
 
 Shown when:
 - The Pen while drawing, over the last anchor without Alt (a click retracts its outgoing handle).

@@ -1,6 +1,7 @@
 # Written by `nibcraft ready`; don't edit. id fingerprint
-Arrow 82c85b4e
-ArrowHollow 7c9a35c3
+Arrow 297893ce
+SelectionArrow 4c3825fa
+SelectionArrowHollow f8050b7d
 DirectAnchor 616d20c3
 DirectAnchorSelected 0d2098cd
 ReshapeSegment 52024f09
@@ -11,12 +12,13 @@ CornerRadius da3c06a9
 PathBracket d78ee686
 TypeWidget 7b9f41e8
 Pen 8a57738d
-PenAdd 36fa8830
-PenDelete 12f199a9
-PenClose baa6e7b5
-PenContinue 18e8c24d
-PenJoin d8503a1a
-PenConvert 2862c6eb
+PenDrawing a84e680f
+PenAdd 1cbf286f
+PenDelete eb99f885
+PenClose c6f7d7ca
+PenContinue 5bb69704
+PenJoin 847b08b9
+PenConvert 109a21fd
 AnchorPoint 9ce25d0c
 Curvature c105d1f6
 Text d26c65d1
