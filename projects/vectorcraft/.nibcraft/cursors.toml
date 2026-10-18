@@ -1,4 +1,4 @@
-# Pulled from VectorCraft 0.12.0 (5a760978, 2026-10-18). Don't edit: `nibcraft pull` rewrites this file.
+# Pulled from VectorCraft 0.12.0 (8b38965d, 2026-10-18). Don't edit: `nibcraft pull` rewrites this file.
 # The cursors VectorCraft needs: one [[cursor]] per `Cursor` value (crates/tools/src/lib.rs).
 #
 # This is the source of truth. nibcraft's `pull` turns it into CURSORS.md for designers, and
@@ -41,14 +41,23 @@ seeds = ["cargo", "run", "--release", "-p", "vectorcraft", "--", "--cursor-seeds
 id = "Arrow"
 group = "Selection"
 shown_when = [
-    "The Selection tool over empty canvas or over an unselected object (no Alt).",
-    "Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.",
     "Any tool with no cursor of its own (Touch Type, Rotate View).",
     "The resting state of Live Paint Selection, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.",
+    "Outside the canvas (menus, panels, the toolbar) the operating system's own pointer shows instead.",
 ]
 hotspot = "The arrow's tip."
+look = "The plain pointer: a solid arrow with a tail, like the operating system's pointer. AddStop, RemoveStop and SliceSelect build on it."
+
+[[cursor]]
+id = "SelectionArrow"
+group = "Selection"
+shown_when = [
+    "The Selection tool on the canvas: over empty canvas or over an unselected object (no Alt).",
+    "Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.",
+]
+hotspot = "The arrowhead's tip."
 confidence = 6
-look = "The default pointer: a solid arrowhead with no tail. ArrowHollow is its hollow twin, and the arrows with badges (PathBracket, TypeWidget, AddStop, RemoveStop, SliceSelect) build on it. While dragging it says \"a move is under way\"."
+look = "A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow. ArrowHollow is its hollow twin, and PathBracket and TypeWidget build on it. While dragging it says \"a move is under way\"."
 
 [[cursor]]
 id = "ArrowHollow"
@@ -56,13 +65,13 @@ group = "Selection"
 shown_when = [
     "Direct Selection at rest where no other cursor applies: empty canvas, fills, handles, straight segments and frame edges.",
     "Direct Selection with Shift held.",
-    "While a Selection or Direct Selection drag snaps to a point or a guide (the solid arrow turns hollow).",
+    "While a Selection or Direct Selection drag snaps to a point or a guide (SelectionArrow turns hollow).",
     "The Selection tool over an anchor when Snap to Point is on.",
     "Selection and Direct Selection over a pie widget of an ellipse, and while dragging one.",
 ]
 hotspot = "The arrow's tip."
 confidence = 6
-look = "Arrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where Arrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it."
+look = "SelectionArrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where SelectionArrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it."
 
 [[cursor]]
 id = "DirectAnchor"
@@ -149,14 +158,14 @@ id = "PathBracket"
 group = "Selection"
 shown_when = ["Selection and Direct Selection over a bracket of selected type on a path, or dragging one (the type slides along its path)."]
 hotspot = "The arrow's tip."
-look = "Arrow with a bracket badge."
+look = "SelectionArrow with a bracket badge."
 
 [[cursor]]
 id = "TypeWidget"
 group = "Selection"
 shown_when = ["The Selection tool over the type widget of selected type (a double-click converts point type to area type and back)."]
 hotspot = "The arrow's tip."
-look = "Arrow with a type badge (a letter T)."
+look = "SelectionArrow with a type badge (a letter T)."
 
 # ── Pen family ────────────────────────────────────────────────────────────────────────────────────
 

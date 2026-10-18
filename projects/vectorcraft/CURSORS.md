@@ -1,15 +1,16 @@
 # VectorCraft cursors
 
-The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (5a760978, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
+The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (8b38965d, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
 
 Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.
 
 Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of the description, from the research behind it. The higher it is, the more closely to follow the description; the lower, the more the drawing is yours, as long as it keeps the cursor's meaning and hotspot.
 
-77 cursors: 67 drawn, 10 to draw, 0 to fix.
+78 cursors: 67 drawn, 11 to draw, 0 to fix.
 
 ## To draw
 
+- SelectionArrow
 - PenDrawing
 - EyedropperType
 - Mesh
@@ -26,14 +27,23 @@ Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of
 ### Arrow · drawn
 
 Shown when:
-- The Selection tool over empty canvas or over an unselected object (no Alt).
-- Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.
 - Any tool with no cursor of its own (Touch Type, Rotate View).
 - The resting state of Live Paint Selection, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.
+- Outside the canvas (menus, panels, the toolbar) the operating system's own pointer shows instead.
 
 Hotspot: The arrow's tip.
 
-Look: The default pointer: a solid arrowhead with no tail. ArrowHollow is its hollow twin, and the arrows with badges (PathBracket, TypeWidget, AddStop, RemoveStop, SliceSelect) build on it. While dragging it says "a move is under way".
+Look: The plain pointer: a solid arrow with a tail, like the operating system's pointer. AddStop, RemoveStop and SliceSelect build on it.
+
+### SelectionArrow · to draw
+
+Shown when:
+- The Selection tool on the canvas: over empty canvas or over an unselected object (no Alt).
+- Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.
+
+Hotspot: The arrowhead's tip.
+
+Look: A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow. ArrowHollow is its hollow twin, and PathBracket and TypeWidget build on it. While dragging it says "a move is under way".
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
@@ -42,13 +52,13 @@ Confidence: 6/10 (keep the meaning; the shape is yours)
 Shown when:
 - Direct Selection at rest where no other cursor applies: empty canvas, fills, handles, straight segments and frame edges.
 - Direct Selection with Shift held.
-- While a Selection or Direct Selection drag snaps to a point or a guide (the solid arrow turns hollow).
+- While a Selection or Direct Selection drag snaps to a point or a guide (SelectionArrow turns hollow).
 - The Selection tool over an anchor when Snap to Point is on.
 - Selection and Direct Selection over a pie widget of an ellipse, and while dragging one.
 
 Hotspot: The arrow's tip.
 
-Look: Arrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where Arrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it.
+Look: SelectionArrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where SelectionArrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it.
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
@@ -151,7 +161,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: Arrow with a bracket badge.
+Look: SelectionArrow with a bracket badge.
 
 ### TypeWidget · drawn
 
@@ -160,7 +170,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: Arrow with a type badge (a letter T).
+Look: SelectionArrow with a type badge (a letter T).
 
 ## Pen
 
