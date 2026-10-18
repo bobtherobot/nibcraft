@@ -21,9 +21,10 @@ Each app gets a folder under the "projects" folder (`projects/vectorcraft/`), an
 
 - **PREVIEW.html** - the preview `check` writes (local only, not committed)
 
-- **.nibcraft/ (hidden sub-folder)** - nibcraft's own files. Don't edit or delete them:
+- **.nibcraft/ (hidden sub-folder)** - nibcraft's own files. Don't edit or delete them (except a line of `changed`, see Step 2):
    - `cursors.toml` - VectorCraft's cursor list as of your last pull
    - `handoff` - what your last `ready` handed over
+   - `changed` - the cursors whose description changed after you drew them (see Step 2)
    - `pull-from` - where VectorCraft lives on this computer (local only, not committed)
 
 ### Seeds
@@ -60,7 +61,7 @@ This sets up and synchronizes NibCraft with VectorCraft on your system:
    - Makes it the current project you are working on.
    - Writes the seeds. To do that it builds VectorCraft, so the first pull takes a few minutes: you'll see VectorCraft's build scroll by. Later pulls are quick. Add `--no-seeds` to skip this. (Building means running VectorCraft's own code, so only pull from a VectorCraft checkout you trust.)
 
-The "pull" command writes `CURSORS.md`, which lists every cursor and its status, and prints which cursors were added to or dropped from the list since the last pull. It never touches your drawings: a dropped cursor's drawing stays in `svg/` and is ignored.
+The "pull" command writes `CURSORS.md`, which lists every cursor and its status, and prints which cursors were added to or dropped from the list since the last pull, and whose descriptions changed. It never touches your drawings: a dropped cursor's drawing stays in `svg/` and is ignored.
 
 Whenever you update the VectorCraft repo (e.g. to get the latest version), you can just run:
 
@@ -76,6 +77,17 @@ cargo run -q -- pull
 Cursor descriptions are listed in `CURSORS.md`. Use these descriptions to draw cursors.
 
 Read [DRAWING-GUIDE.md](DRAWING-GUIDE.md) first.
+
+**Confidence.** Some descriptions end with a confidence from 0 to 10, such as `Confidence: 7/10`. It says how sure VectorCraft is of the description, from the research behind it, and so how closely to follow it:
+- 9–10: follow the description closely.
+- 7–8: follow its meaning and shape; the details are yours.
+- 4–6: keep the meaning; the shape is yours.
+- 1–3: free to design, keeping the meaning, the hotspot and the family the cursor belongs to.
+- 0: a placeholder.
+
+Whatever the number, what a description states plainly (such as "No tail.") is not up for interpretation.
+
+**Changed since last pull.** When VectorCraft changes what a cursor you've already drawn must say, `CURSORS.md` lists it under "Changed since last pull" and marks it "changed since last pull". Check the drawing against the new description and redraw it where it no longer fits. A cursor leaves the list once its drawing changes. If a drawing already fits, delete its line from `.nibcraft/changed` (the one place you may edit there).
 
 **Name each file after its cursor's ID.** Every cursor in `CURSORS.md` has an ID, such as `PenAdd`. Save its drawing in `svg/` as that ID plus `.svg`: `svg/PenAdd.svg`. The name must match the ID exactly, including upper and lower case: `penadd.svg` or `Pen-Add.svg` won't be used.
 
@@ -106,11 +118,11 @@ Switch the background to grey or dark to see the white halos.
 
 Drawings VectorCraft doesn't use are shown at the end.
 
-The "To do" column lists **[m] missing** cursors (no drawing yet) and **[f] fix** items (the drawing doesn't convert).
+The "To do" column lists **[m] missing** cursors (no drawing yet), **[f] fix** items (the drawing doesn't convert) and **[c] changed** cursors (the description changed after you drew them).
 
 It also refreshes `CURSORS.md`, and notes when VectorCraft's list has changed since your last pull.
 
-A drawing of a listed cursor that doesn't convert is a problem; `check` fails until it's fixed. Nothing else is.
+A drawing of a listed cursor that doesn't convert is a problem; `check` fails until it's fixed. Nothing else is: a changed cursor doesn't stop a handoff.
 
 ### Step 4 - Hand over
 When you're happy with your work and ready to integrate the cursors, prepare and finalize your work here in NibCraft so the updates can go into VectorCraft.
@@ -189,7 +201,7 @@ cargo test
 - `src/geom.rs`: flattening, convexity and ear-clipping triangulation.
 - `src/emit.rs`: writes the Rust.
 - `src/manifest.rs`: reads an app's cursor list.
-- `src/pull.rs`: `pull`, copying the cursor list into its project.
+- `src/pull.rs`: `pull`, copying the cursor list into its project and recording the cursors whose description changed (`.nibcraft/changed`).
 - `src/seeds.rs`: `pull`'s seeds: runs the command the app's cursor list names (`seeds = [...]`) and writes what it draws as `<id>-<app>-rendered.svg`.
 - `src/check.rs`: the `check` precheck of a project against its cursor list.
 - `src/cursors_md.rs`: writes `CURSORS.md`.
