@@ -1,8 +1,10 @@
 # VectorCraft cursors
 
-The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (0d9fc1b1, 2026-10-17)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
+The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (5a760978, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
 
 Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.
+
+Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of the description, from the research behind it. The higher it is, the more closely to follow the description; the lower, the more the drawing is yours, as long as it keeps the cursor's meaning and hotspot.
 
 77 cursors: 67 drawn, 10 to draw, 0 to fix.
 
@@ -25,24 +27,30 @@ Draw each cursor as `svg/<id>.svg` from its description below, never from anothe
 
 Shown when:
 - The Selection tool over empty canvas or over an unselected object (no Alt).
-- Dragging with the Selection tool (a move), or with Direct Selection (an anchor, a segment or a handle).
+- Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.
 - Any tool with no cursor of its own (Touch Type, Rotate View).
-- The resting state of Live Paint Selection, Reshape (away from a path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.
+- The resting state of Live Paint Selection, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.
 
 Hotspot: The arrow's tip.
 
-Look: The default pointer: a solid arrow. ArrowHollow is its hollow twin.
+Look: The default pointer: a solid arrowhead with no tail. ArrowHollow is its hollow twin, and the arrows with badges (PathBracket, TypeWidget, AddStop, RemoveStop, SliceSelect) build on it. While dragging it says "a move is under way".
+
+Confidence: 6/10 (keep the meaning; the shape is yours)
 
 ### ArrowHollow · drawn
 
 Shown when:
-- Direct Selection at rest: away from anchors and curved segments, and over handles and fills.
-- The pen-family tools with Cmd/Ctrl held (which lends Direct Selection).
+- Direct Selection at rest where no other cursor applies: empty canvas, fills, handles, straight segments and frame edges.
+- Direct Selection with Shift held.
 - While a Selection or Direct Selection drag snaps to a point or a guide (the solid arrow turns hollow).
+- The Selection tool over an anchor when Snap to Point is on.
+- Selection and Direct Selection over a pie widget of an ellipse, and while dragging one.
 
 Hotspot: The arrow's tip.
 
-Look: The same pointer as Arrow, hollow: white with a dark outline.
+Look: Arrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where Arrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it.
+
+Confidence: 6/10 (keep the meaning; the shape is yours)
 
 ### DirectAnchor · drawn
 
@@ -53,51 +61,68 @@ Hotspot: The arrow's tip.
 
 Look: ArrowHollow with a small hollow square badge (an unselected anchor).
 
+Confidence: 7/10 (follow its meaning and shape; the details are yours)
+
 ### DirectAnchorSelected · drawn
 
 Shown when:
-- Direct Selection over an anchor of a selected path.
+- Direct Selection over an anchor of a selected path, whether or not that anchor is selected.
 
 Hotspot: The arrow's tip.
 
-Look: ArrowHollow with a small filled square badge (a selected anchor).
+Look: ArrowHollow with a small filled square badge (the anchor's path is selected). DirectAnchor is the same with the square hollow.
+
+Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
 ### ReshapeSegment · drawn
 
 Shown when:
-- Direct Selection over a curved segment of a path that isn't selected as a whole.
-- The Anchor Point tool over a segment, and while it reshapes one.
+- Direct Selection over a curved segment, unless its path is selected whole (then a drag moves the path).
+- Direct Selection while it drags a curved segment.
+- Direct Selection over a curved segment of a selected blend's spine.
+- The Anchor Point tool over a segment, straight or curved, away from anchors and handles.
+- The Anchor Point tool while it reshapes a segment.
 - The Pen with Alt held over a segment of a selected path, and while it reshapes one.
+- Never over a straight segment with Direct Selection: a drag there moves the segment instead of bending it.
 
 Hotspot: The arrowhead's tip.
 
-Look: Says "a drag bends this segment": an arrowhead with a small curve between two anchor marks.
+Look: Says "a drag bends this segment": a solid arrowhead with a small curve between two anchor marks.
+
+Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
 ### GroupSelection · drawn
 
 Shown when:
 - The Group Selection tool: each click selects the next enclosing group.
 - Direct Selection with Alt held (Alt makes it Group Selection for the next click).
+- The Group Selection tool while dragging, an Alt-drag copy included.
 
 Hotspot: The arrow's tip.
 
 Look: ArrowHollow with a plus badge.
 
+Confidence: 6/10 (keep the meaning; the shape is yours)
+
 ### SelectionCopy · drawn
 
 Shown when:
 - Alt-dragging a copy with the Selection tool (the drag leaves the original behind).
-- Alt-dragging a copy with Direct Selection, dragging a path whole (by its fill, or by an anchor of a path selected whole).
+- Alt-dragging a copy with Direct Selection: an Alt-press anywhere on a path takes the whole path, and the drag copies it.
+- Pressing Alt during a Selection or Direct Selection move turns it into a copy and shows this.
 
 Hotspot: The front arrowhead's tip.
 
-Look: Says "a copy": a double arrowhead, one in front of the other.
+Look: Says "a copy": two arrowheads, one solid and one hollow, one in front of the other.
+
+Confidence: 6/10 (keep the meaning; the shape is yours)
 
 ### Move · drawn
 
 Shown when:
 - The Selection tool over a selected object, or over any object with Alt held (once an Alt-drag starts, SelectionCopy shows).
-- Reshape over a path or while dragging.
+- Reshape over a selected path or while dragging.
+- The Curvature tool over a point (a drag moves it).
 - Inside the Free Transform and Crop Image boxes.
 - Puppet Warp over a pin.
 - The Artboard tool inside an artboard.
@@ -116,6 +141,8 @@ Shown when:
 Hotspot: The arrow's tip.
 
 Look: ArrowHollow with a rounded-corner badge.
+
+Confidence: 5/10 (keep the meaning; the shape is yours)
 
 ### PathBracket · drawn
 
@@ -140,13 +167,16 @@ Look: Arrow with a type badge (a letter T).
 ### Pen · drawn
 
 Shown when:
-- The Pen tool where a click starts a new path.
-- The Curvature tool away from its points.
+- The Pen tool when no path is being drawn, where a click starts a new path.
+- That includes over a selected path with Shift held or Auto Add/Delete off, and with Alt held away from selected paths.
 - With Use Precise Cursors on, the crosshair shows instead.
+- With Cmd/Ctrl held, the Pen lends a selection tool, and that tool's own cursors show instead.
 
 Hotspot: The nib's tip.
 
-Look: A pen nib. Every Pen-family cursor is this nib with a different badge.
+Look: A pen nib with a small asterisk badge (a new path starts here). Every Pen-family cursor is this nib with a different badge; PenDrawing is the bare nib.
+
+Confidence: 8/10 (follow its meaning and shape; the details are yours)
 
 ### PenDrawing · to draw
 
@@ -156,24 +186,30 @@ Shown when:
 
 Hotspot: The nib's tip.
 
-Look: The Pen nib with no badge.
+Look: The bare Pen nib: the Pen without its asterisk, so starting a path visibly changes the cursor.
+
+Confidence: 8/10 (follow its meaning and shape; the details are yours)
 
 ### PenAdd · drawn
 
 Shown when:
-- The Pen over a segment of a selected path with Auto Add/Delete on (Shift off), or over a selected blend's spine.
+- The Pen, when no path is being drawn, over a segment of a selected path with Auto Add/Delete on and Shift up.
+- The Pen, when no path is being drawn, over a selected blend's spine.
 - The Add Anchor Point tool everywhere (and the Delete Anchor Point tool with Alt).
-- The Curvature tool over a segment.
-- Stands in for MeshAdd and PuppetPin until they're drawn.
+- The Curvature tool over a segment of a selected path.
+- Stands in for PuppetPin until it's drawn.
 
 Hotspot: The nib's tip.
 
 Look: The Pen nib with a plus badge.
 
+Confidence: 9/10 (follow the description closely)
+
 ### PenDelete · drawn
 
 Shown when:
-- The Pen over an anchor of a selected path (Auto Add/Delete), or over a blend-spine point.
+- The Pen, when no path is being drawn, over an anchor of a selected path with Auto Add/Delete on and Shift up.
+- The Pen, when no path is being drawn, over a point of a selected blend's spine.
 - The Delete Anchor Point tool everywhere (and the Add Anchor Point tool with Alt).
 - The Mesh tool with Alt over a mesh point.
 
@@ -181,25 +217,32 @@ Hotspot: The nib's tip.
 
 Look: The Pen nib with a minus badge.
 
+Confidence: 9/10 (follow the description closely)
+
 ### PenClose · drawn
 
 Shown when:
-- The Pen while drawing, over the first anchor of the path (a click closes it).
-- The Curvature tool over its first point (three points or more), or near the other end of the current open path.
+- The Pen while drawing, over the first anchor once the path has two or more (a click closes it).
+- The Curvature tool over the first point of the path being drawn, once it has three or more, without Alt.
+- The Curvature tool near the other end of an open path whose end point is current.
 
 Hotspot: The nib's tip.
 
 Look: The Pen nib with a ring badge (closing the loop).
 
+Confidence: 9/10 (follow the description closely)
+
 ### PenContinue · drawn
 
 Shown when:
-- The Pen (not drawing) over an end of an open path (a click continues it).
-- The Curvature tool over an open end.
+- The Pen, when no path is being drawn, over an end of an open path (a click continues it).
+- The Curvature tool over an open end of a selected path, without Alt.
 
 Hotspot: The nib's tip.
 
 Look: The Pen nib with a slash badge.
+
+Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
 ### PenJoin · drawn
 
@@ -210,34 +253,46 @@ Hotspot: The nib's tip.
 
 Look: The Pen nib with a badge showing a line running into an end point.
 
+Confidence: 6/10 (keep the meaning; the shape is yours)
+
 ### PenConvert · drawn
 
 Shown when:
-- The Pen while drawing, over the last anchor (a click retracts its outgoing handle). With Alt the Pen shows AnchorPoint and ReshapeSegment instead.
+- The Pen while drawing, over the last anchor without Alt (a click retracts its outgoing handle).
+- With Alt held the Pen shows AnchorPoint over that anchor instead.
+- The Curvature tool with Alt held over a point (a click toggles it between corner and smooth).
 
 Hotspot: The nib's tip.
 
-Look: The Pen nib with a caret badge (like the AnchorPoint caret).
+Look: The Pen nib with a caret badge. It is the Pen's own badge, not the AnchorPoint cursor.
+
+Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
 ### AnchorPoint · drawn
 
 Shown when:
-- The Anchor Point tool, except over a segment (ReshapeSegment shows there).
-- The Pen with Alt held, over an anchor or a handle end of a selected path.
+- The Anchor Point tool over anchors, handle ends and empty canvas (ReshapeSegment shows over a segment).
+- The Anchor Point tool while it converts an anchor or drags a handle.
+- The Pen with Alt held, over an anchor or a handle end of a selected path, the last anchor of the path being drawn included.
 
-Hotspot: The anchor mark at the caret's apex.
+Hotspot: The caret's apex.
 
-Look: A caret (an upside-down V) with a small anchor square at its apex.
+Look: A caret (an upside-down V) like the Anchor Point tool's own icon, with the hotspot clearly marked at its apex.
+
+Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
 ### Curvature · drawn
 
 Shown when:
-- The Curvature tool over empty canvas, or anywhere while drawing a path away from its points.
-- Elsewhere the Curvature tool borrows Pen-family cursors: PenAdd over a segment, Move over an anchor, PenContinue at an open end, PenConvert with Alt, PenClose over the first point of the path being drawn.
+- The Curvature tool over empty canvas or unselected art, where a click starts a new path.
+- The Curvature tool while drawing a path, away from its points (a click adds the next point).
+- Elsewhere it borrows: PenAdd over a segment of a selected path, Move over a point, PenContinue at an open end, PenConvert with Alt over a point, PenClose over the first point.
 
 Hotspot: The nib's tip.
 
 Look: The Pen nib with a curve badge.
+
+Confidence: 3/10 (free to design, keeping the meaning, the hotspot and the family it belongs to)
 
 ## Type
 
@@ -269,7 +324,7 @@ Shown when:
 - The Rotate, Reflect, Scale and Shear tools with a selection (Reflect, Scale and Shear even mid-drag).
 - The Area Type and Type on a Path tools over a suitable path.
 - The Artboard tool outside every artboard; the Gradient tool away from the annotator; Free Transform corners in Distort or Perspective mode.
-- With Use Precise Cursors on, it replaces the Pen, Eyedropper, Slice, Blend and Shape Builder cursors.
+- With Use Precise Cursors on, it replaces the Pen-family, Anchor Point, Curvature, Scissors, Eyedropper, Slice, Blend and Shape Builder cursors (not the selection arrows).
 - Stands in for every drawing tool cursor not drawn yet.
 
 Hotspot: The centre of the open gap.
@@ -626,6 +681,8 @@ Hotspot: Where the blades cross, exact enough to cut where aimed.
 
 Look: Scissors. ScissorsNotAllowed is this drawing with a badge.
 
+Confidence: 2/10 (free to design, keeping the meaning, the hotspot and the family it belongs to)
+
 ### ScissorsNotAllowed · drawn
 
 Shown when:
@@ -634,6 +691,8 @@ Shown when:
 Hotspot: The same point as Scissors.
 
 Look: The Scissors with a small not-allowed badge, so the cursor keeps its size and shape and only the badge says a click won't cut.
+
+Confidence: 2/10 (free to design, keeping the meaning, the hotspot and the family it belongs to)
 
 ### Shaper · to draw
 
