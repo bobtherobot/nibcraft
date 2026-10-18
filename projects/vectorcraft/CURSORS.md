@@ -6,11 +6,10 @@ Draw each cursor as `svg/<id>.svg` from its description below, never from anothe
 
 Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of the description, from the research behind it. The higher it is, the more closely to follow the description; the lower, the more the drawing is yours, as long as it keeps the cursor's meaning and hotspot.
 
-78 cursors: 67 drawn, 11 to draw, 0 to fix, 24 changed since last pull.
+78 cursors: 68 drawn, 10 to draw, 0 to fix, 11 changed since last pull.
 
 ## To draw
 
-- SelectionArrow
 - PenDrawing
 - EyedropperType
 - Mesh
@@ -26,18 +25,6 @@ Some descriptions end with a confidence from 0 to 10: how sure VectorCraft is of
 
 VectorCraft changed what these cursors must say after they were drawn. Check each drawing against its description below and redraw it where it no longer fits. A cursor leaves this list when its drawing changes; if a drawing already fits, delete its line from `.nibcraft/changed`.
 
-- Arrow
-- SelectionArrowHollow
-- DirectAnchor
-- DirectAnchorSelected
-- ReshapeSegment
-- GroupSelection
-- SelectionCopy
-- Move
-- CornerRadius
-- PathBracket
-- TypeWidget
-- Pen
 - PenAdd
 - PenDelete
 - PenClose
@@ -47,13 +34,12 @@ VectorCraft changed what these cursors must say after they were drawn. Check eac
 - AnchorPoint
 - Curvature
 - Crosshair
-- Width
 - Scissors
 - ScissorsNotAllowed
 
 ## Selection
 
-### Arrow · changed since last pull
+### Arrow · drawn
 
 Shown when:
 - Any tool with no cursor of its own (Touch Type, Rotate View).
@@ -63,7 +49,7 @@ Hotspot: The arrow's tip.
 
 Look: The plain pointer: a solid arrow with a tail, like the operating system's pointer. AddStop, RemoveStop and SliceSelect build on it.
 
-### SelectionArrow · to draw
+### SelectionArrow · drawn
 
 Shown when:
 - The Selection tool on the canvas: over empty canvas or over an unselected object (no Alt).
@@ -77,7 +63,7 @@ Look: A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
-### SelectionArrowHollow · changed since last pull
+### SelectionArrowHollow · drawn
 
 Shown when:
 - Direct Selection at rest where no other cursor applies: empty canvas, fills, handles, straight segments and frame edges.
@@ -92,7 +78,7 @@ Look: SelectionArrow's hollow twin, a hollow arrowhead with no tail: white with 
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
-### DirectAnchor · changed since last pull
+### DirectAnchor · drawn
 
 Shown when:
 - Direct Selection over an anchor of a path that isn't selected.
@@ -103,7 +89,7 @@ Look: SelectionArrowHollow with a small hollow square badge (an unselected ancho
 
 Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
-### DirectAnchorSelected · changed since last pull
+### DirectAnchorSelected · drawn
 
 Shown when:
 - Direct Selection over an anchor of a selected path, whether or not that anchor is selected.
@@ -114,7 +100,7 @@ Look: SelectionArrowHollow with a small filled square badge (the anchor's path i
 
 Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
-### ReshapeSegment · changed since last pull
+### ReshapeSegment · drawn
 
 Shown when:
 - Direct Selection over a curved segment, unless its path is selected whole (then a drag moves the path).
@@ -131,7 +117,7 @@ Look: Says "a drag bends this segment": a solid arrowhead with a small curve bet
 
 Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
-### GroupSelection · changed since last pull
+### GroupSelection · drawn
 
 Shown when:
 - The Group Selection tool: each click selects the next enclosing group.
@@ -144,7 +130,7 @@ Look: SelectionArrowHollow with a plus badge. No tail.
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
-### SelectionCopy · changed since last pull
+### SelectionCopy · drawn
 
 Shown when:
 - Alt-dragging a copy with the Selection tool (the drag leaves the original behind).
@@ -157,7 +143,7 @@ Look: Says "a copy": two arrowheads, one solid and one hollow, one in front of t
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
-### Move · changed since last pull
+### Move · drawn
 
 Shown when:
 - The Selection tool over a selected object, or over any object with Alt held (once an Alt-drag starts, SelectionCopy shows).
@@ -173,7 +159,7 @@ Hotspot: The centre.
 
 Look: A four-way move cursor.
 
-### CornerRadius · changed since last pull
+### CornerRadius · drawn
 
 Shown when:
 - Selection and Direct Selection (not Group Selection) over a Live Corners widget, and while dragging one (rounding the corners).
@@ -184,7 +170,7 @@ Look: SelectionArrowHollow with a rounded-corner badge. No tail.
 
 Confidence: 5/10 (keep the meaning; the shape is yours)
 
-### PathBracket · changed since last pull
+### PathBracket · drawn
 
 Shown when:
 - Selection and Direct Selection over a bracket of selected type on a path, or dragging one (the type slides along its path).
@@ -193,7 +179,7 @@ Hotspot: The arrow's tip.
 
 Look: SelectionArrow with a bracket badge. No tail.
 
-### TypeWidget · changed since last pull
+### TypeWidget · drawn
 
 Shown when:
 - The Selection tool over the type widget of selected type (a double-click converts point type to area type and back).
@@ -204,7 +190,7 @@ Look: SelectionArrow with a type badge (a letter T). No tail.
 
 ## Pen
 
-### Pen · changed since last pull
+### Pen · drawn
 
 Shown when:
 - The Pen tool when no path is being drawn, where a click starts a new path.
@@ -564,7 +550,7 @@ Hotspot: Where the paint pours out.
 
 ## Width, blend, slice and shape builder
 
-### Width · changed since last pull
+### Width · drawn
 
 Shown when:
 - The Width tool away from strokes.
