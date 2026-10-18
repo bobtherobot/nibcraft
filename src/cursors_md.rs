@@ -24,6 +24,9 @@ pub fn render(app: &str, stamp: Option<&str>, m: &Manifest, r: &Report) -> Strin
     let from = stamp.map(|s| format!(" (pulled from {s})")).unwrap_or_default();
     out.push_str(&format!("The cursors {app} needs, from its cursor list{from}. Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for {app}'s developers go in DESIGNER_NOTES.md.\n\n"));
     out.push_str("Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.\n\n");
+    if m.designer_cursors().any(|c| c.confidence().is_some()) {
+        out.push_str(&format!("Some descriptions end with a confidence from 0 to 10: how sure {app} is of the description, from the research behind it. The higher it is, the more closely to follow the description; the lower, the more the drawing is yours, as long as it keeps the cursor's meaning and hotspot.\n\n"));
+    }
     out.push_str(&format!("{total} cursors: {} drawn, {missing} to draw, {fix} to fix.\n", total - missing - fix));
 
     for (kind, title) in [(TodoKind::Missing, "To draw"), (TodoKind::Fix, "To fix")] {
@@ -82,5 +85,14 @@ mod tests {
         assert!(md.contains("## Pen\n\n### Pen · drawn\n\nShown when:\n- The Pen tool.\n\nHotspot: Tip.\n\nLook: A nib.\n"), "{md}");
         assert!(md.contains("### Lasso · to draw") && md.contains("### Knife · to fix"), "{md}");
         assert!(md.contains("## Not needed") && md.contains("- **Liquify tools**: The app draws the brush."), "{md}");
+        assert!(!md.contains("Confidence"), "no cursor is rated, so nothing explains the number: {md}");
+    }
+
+    #[test]
+    fn explains_the_confidence_number_once_a_cursor_has_one() {
+        let m = Manifest::parse("[[cursor]]\nid = \"Pen\"\nshown_when = [\"Pen.\"]\nhotspot = \"Tip.\"\nconfidence = 9\n").unwrap();
+        let md = render("VectorCraft", None, &m, &assess(Ok(&m), vec![]));
+        assert!(md.contains("Some descriptions end with a confidence from 0 to 10:"), "{md}");
+        assert!(md.contains("Confidence: 9/10 (follow the description closely)"), "{md}");
     }
 }

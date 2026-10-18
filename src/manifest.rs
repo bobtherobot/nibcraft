@@ -31,6 +31,10 @@ pub struct Cursor {
     #[serde(default)]
     pub hotspot: String,
     pub look: Option<String>,
+    /// How sure the app is of this description, 0 to 10 (from the research behind it), so the
+    /// designer knows how closely to follow it. Kept as written: a number out of range is ignored
+    /// rather than making the whole list unreadable.
+    pub confidence: Option<toml::Value>,
     /// False for a cursor the operating system draws on purpose: designers never see it.
     #[serde(default = "yes")]
     pub designer: bool,
@@ -86,7 +90,26 @@ impl Cursor {
         if let Some(look) = &self.look {
             out.push_str(&format!("\n\nLook: {look}"));
         }
+        if let Some(c) = self.confidence() {
+            out.push_str(&format!("\n\nConfidence: {c}/10 ({})", follow(c)));
+        }
         out
+    }
+
+    /// The cursor's confidence, when it's a whole number from 0 to 10.
+    pub fn confidence(&self) -> Option<u8> {
+        self.confidence.as_ref()?.as_integer().filter(|c| (0..=10).contains(c)).map(|c| c as u8)
+    }
+}
+
+/// How closely to follow a description rated `c` out of 10.
+fn follow(c: u8) -> &'static str {
+    match c {
+        9.. => "follow the description closely",
+        7..=8 => "follow its meaning and shape; the details are yours",
+        4..=6 => "keep the meaning; the shape is yours",
+        1..=3 => "free to design, keeping the meaning, the hotspot and the family it belongs to",
+        0 => "a placeholder",
     }
 }
 
@@ -101,6 +124,7 @@ group = "Pen"
 shown_when = ["The Pen tool.", "Curvature away from points."]
 hotspot = "The nib's tip."
 look = "A nib."
+confidence = 7
 
 [[cursor]]
 id = "NotAllowed"
@@ -133,8 +157,24 @@ why = "The app draws the brush."
     #[test]
     fn a_description_lists_when_it_shows_its_hotspot_and_look() {
         let m = Manifest::parse(TOML).unwrap();
-        assert_eq!(m.cursor[0].description(), "Shown when:\n- The Pen tool.\n- Curvature away from points.\n\nHotspot: The nib's tip.\n\nLook: A nib.");
+        assert_eq!(
+            m.cursor[0].description(),
+            "Shown when:\n- The Pen tool.\n- Curvature away from points.\n\nHotspot: The nib's tip.\n\nLook: A nib.\n\nConfidence: 7/10 (follow its meaning and shape; the details are yours)"
+        );
         assert!(!m.cursor[2].description().contains("Look:"));
+        assert!(!m.cursor[2].description().contains("Confidence:"));
+    }
+
+    #[test]
+    fn confidence_says_how_closely_to_follow_and_ignores_numbers_out_of_range() {
+        let with = |c: &str| Manifest::parse(&format!("[[cursor]]\nid = \"Pen\"\nconfidence = {c}\n")).unwrap().cursor[0].description();
+        assert!(with("10").contains("Confidence: 10/10 (follow the description closely)"), "{}", with("10"));
+        assert!(with("5").contains("Confidence: 5/10 (keep the meaning; the shape is yours)"));
+        assert!(with("2").contains("Confidence: 2/10 (free to design, keeping the meaning, the hotspot and the family it belongs to)"));
+        assert!(with("0").contains("Confidence: 0/10 (a placeholder)"));
+        for bad in ["11", "-1", "7.5", "\"high\""] {
+            assert!(!with(bad).contains("Confidence:"), "{bad}");
+        }
     }
 
     #[test]
