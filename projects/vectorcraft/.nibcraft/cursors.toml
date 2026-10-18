@@ -1,4 +1,4 @@
-# Pulled from VectorCraft 0.12.0 (d3db88fa, 2026-10-18). Don't edit: `nibcraft pull` rewrites this file.
+# Pulled from VectorCraft 0.12.0 (76116cd1, 2026-10-18). Don't edit: `nibcraft pull` rewrites this file.
 # The cursors VectorCraft needs: one [[cursor]] per `Cursor` value (crates/tools/src/lib.rs).
 #
 # This is the source of truth. nibcraft's `pull` turns it into CURSORS.md for designers, and
@@ -58,7 +58,7 @@ shown_when = [
 ]
 hotspot = "The arrowhead's tip."
 confidence = 6
-look = "A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow. SelectionArrowHollow is its hollow twin, and PathBracket and TypeWidget build on it. While dragging it says \"a move is under way\"."
+look = "A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow. SelectionArrowHollow is its hollow twin, and PathBracket and TypeWidget build on it. While dragging it says \"a move is under way\". No tail."
 
 [[cursor]]
 id = "SelectionArrowHollow"
@@ -72,7 +72,7 @@ shown_when = [
 ]
 hotspot = "The arrow's tip."
 confidence = 6
-look = "SelectionArrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where SelectionArrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it."
+look = "SelectionArrow's hollow twin, a hollow arrowhead with no tail: white with a dark outline, its tip where SelectionArrow's is. DirectAnchor, DirectAnchorSelected, GroupSelection and CornerRadius build on it. No tail."
 
 [[cursor]]
 id = "DirectAnchor"
@@ -80,7 +80,7 @@ group = "Selection"
 shown_when = ["Direct Selection over an anchor of a path that isn't selected."]
 hotspot = "The arrow's tip."
 confidence = 7
-look = "SelectionArrowHollow with a small hollow square badge (an unselected anchor)."
+look = "SelectionArrowHollow with a small hollow square badge (an unselected anchor). No tail."
 
 [[cursor]]
 id = "DirectAnchorSelected"
@@ -88,7 +88,7 @@ group = "Selection"
 shown_when = ["Direct Selection over an anchor of a selected path, whether or not that anchor is selected."]
 hotspot = "The arrow's tip."
 confidence = 7
-look = "SelectionArrowHollow with a small filled square badge (the anchor's path is selected). DirectAnchor is the same with the square hollow."
+look = "SelectionArrowHollow with a small filled square badge (the anchor's path is selected). DirectAnchor is the same with the square hollow. No tail."
 
 [[cursor]]
 id = "ReshapeSegment"
@@ -104,7 +104,7 @@ shown_when = [
 ]
 hotspot = "The arrowhead's tip."
 confidence = 7
-look = "Says \"a drag bends this segment\": a solid arrowhead with a small curve between two anchor marks."
+look = "Says \"a drag bends this segment\": a solid arrowhead with a small curve between two anchor marks. No tail."
 
 [[cursor]]
 id = "GroupSelection"
@@ -116,7 +116,7 @@ shown_when = [
 ]
 hotspot = "The arrow's tip."
 confidence = 6
-look = "SelectionArrowHollow with a plus badge."
+look = "SelectionArrowHollow with a plus badge. No tail."
 
 [[cursor]]
 id = "SelectionCopy"
@@ -128,7 +128,7 @@ shown_when = [
 ]
 hotspot = "The front arrowhead's tip."
 confidence = 6
-look = "Says \"a copy\": two arrowheads, one solid and one hollow, one in front of the other."
+look = "Says \"a copy\": two arrowheads, one solid and one hollow, one in front of the other. No tail."
 
 [[cursor]]
 id = "Move"
@@ -152,21 +152,21 @@ group = "Selection"
 shown_when = ["Selection and Direct Selection (not Group Selection) over a Live Corners widget, and while dragging one (rounding the corners)."]
 hotspot = "The arrow's tip."
 confidence = 5
-look = "SelectionArrowHollow with a rounded-corner badge."
+look = "SelectionArrowHollow with a rounded-corner badge. No tail."
 
 [[cursor]]
 id = "PathBracket"
 group = "Selection"
 shown_when = ["Selection and Direct Selection over a bracket of selected type on a path, or dragging one (the type slides along its path)."]
 hotspot = "The arrow's tip."
-look = "SelectionArrow with a bracket badge."
+look = "SelectionArrow with a bracket badge. No tail."
 
 [[cursor]]
 id = "TypeWidget"
 group = "Selection"
 shown_when = ["The Selection tool over the type widget of selected type (a double-click converts point type to area type and back)."]
 hotspot = "The arrow's tip."
-look = "SelectionArrow with a type badge (a letter T)."
+look = "SelectionArrow with a type badge (a letter T). No tail."
 
 # ── Pen family ────────────────────────────────────────────────────────────────────────────────────
 
@@ -521,7 +521,7 @@ id = "Width"
 group = "Width, blend, slice and shape builder"
 shown_when = ["The Width tool away from strokes."]
 hotspot = "The arrow's tip."
-look = "SelectionArrowHollow with a lens badge (a stroke that swells in the middle). WidthAdd and WidthPoint build on it."
+look = "SelectionArrowHollow with a lens badge (a stroke that swells in the middle). WidthAdd and WidthPoint build on it. No tail."
 
 [[cursor]]
 id = "WidthAdd"

@@ -35,6 +35,8 @@ pub enum TodoKind {
     Missing,
     /// The drawing doesn't convert.
     Fix,
+    /// Drawn, but its description changed in a pull after the drawing was made.
+    Changed,
 }
 
 /// SVGs whose names start with `_` are scratch files and are skipped entirely.
@@ -90,6 +92,18 @@ pub fn assess(manifest: Result<&Manifest, String>, svgs: Vec<(String, Vec<u8>)>)
     Report { cards, extras, problems, todos }
 }
 
+/// Mark the drawn cursors of `m` whose description changed in a pull (`record`: id and the
+/// drawing's fingerprint then) and whose drawing hasn't changed since. Doesn't stop a handoff.
+pub fn mark_changed(r: &mut Report, m: &Manifest, record: &[(String, String)], svgs: &[(String, Vec<u8>)]) {
+    for c in m.designer_cursors() {
+        let file = format!("{}.svg", c.id);
+        let unchanged = |fp: &str| svgs.iter().any(|(f, bytes)| *f == file && fingerprint(bytes) == fp);
+        if record.iter().any(|(id, fp)| *id == c.id && unchanged(fp)) && !r.todos.iter().any(|t| t.id == c.id) {
+            r.todos.push(Todo { id: c.id.clone(), kind: TodoKind::Changed, description: c.description() });
+        }
+    }
+}
+
 /// The project's cursor list as last pulled, and the stamp line saying where it came from.
 pub struct Pulled {
     pub manifest: Result<Manifest, String>,
@@ -135,6 +149,24 @@ pub fn drawings(dir: &Path) -> Result<Vec<(String, Vec<u8>)>, String> {
     let mut names: Vec<String> = entries.filter_map(|e| e.ok()?.file_name().into_string().ok()).filter(|n| is_drawing(n)).collect();
     names.sort();
     names.into_iter().map(|n| std::fs::read(dir.join(&n)).map(|b| (n.clone(), b)).map_err(|e| format!("{shown}/{n}: {e}"))).collect()
+}
+
+#[cfg(test)]
+mod changed_tests {
+    use super::*;
+
+    #[test]
+    fn a_changed_cursor_stays_listed_until_its_drawing_changes() {
+        let m = Manifest::parse("[[cursor]]\nid = \"Pen\"\nshown_when = [\"Pen.\"]\nhotspot = \"Tip.\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso.\"]\nhotspot = \"Tip.\"\n").unwrap();
+        let nib = include_bytes!("../testdata/round-trip-checker.svg").to_vec();
+        let svgs = vec![("Pen.svg".to_string(), nib.clone()), ("Lasso.svg".to_string(), nib.clone())];
+        let record = [("Pen".to_string(), fingerprint(&nib)), ("Lasso".to_string(), fingerprint(b"before")), ("Gone".to_string(), "-".to_string())];
+        let mut r = assess(Ok(&m), svgs.clone());
+        mark_changed(&mut r, &m, &record, &svgs);
+        let changed: Vec<&str> = r.todos.iter().filter(|t| t.kind == TodoKind::Changed).map(|t| t.id.as_str()).collect();
+        assert_eq!(changed, ["Pen"]);
+        assert!(r.problems.is_empty(), "a changed description doesn't stop a handoff");
+    }
 }
 
 #[cfg(test)]

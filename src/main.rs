@@ -88,7 +88,11 @@ struct Checked {
 /// only a project that can't be read at all is an error.
 fn check_project(p: &Project) -> Result<Checked, String> {
     let pulled = check::pulled(p);
-    let report = check::assess(pulled.manifest.as_ref().map_err(Clone::clone), check::drawings(&p.svg_dir())?);
+    let svgs = check::drawings(&p.svg_dir())?;
+    let mut report = check::assess(pulled.manifest.as_ref().map_err(Clone::clone), svgs.clone());
+    if let Ok(m) = &pulled.manifest {
+        check::mark_changed(&mut report, m, &pull::changes(p), &svgs);
+    }
     let app = pulled.manifest.as_ref().ok().and_then(|m| m.app.clone()).unwrap_or_else(|| p.name.clone());
     let mut advice = vec![];
     if pull::stale(p) == Some(true) {
@@ -114,6 +118,10 @@ fn check_project(p: &Project) -> Result<Checked, String> {
         count(check::TodoKind::Missing),
         count(check::TodoKind::Fix)
     );
+    let changed = count(check::TodoKind::Changed);
+    if changed > 0 {
+        text.push_str(&format!(", {changed} changed since last pull (see CURSORS.md)"));
+    }
     if !report.extras.is_empty() {
         text.push_str(&format!(" ({} other drawings, not used)", report.extras.len()));
     }
@@ -139,6 +147,9 @@ fn pull_cmd(args: &[String]) -> Result<String, String> {
     if !got.first {
         if got.added.is_empty() && got.dropped.is_empty() {
             out.push_str("No cursors added or removed since the last pull.\n");
+        }
+        if !got.changed.is_empty() {
+            out.push_str(&format!("Descriptions changed: {} (see CURSORS.md › Changed since last pull)\n", got.changed.join(", ")));
         }
         if !got.added.is_empty() {
             out.push_str(&format!("New in the list: {}\n", got.added.join(", ")));

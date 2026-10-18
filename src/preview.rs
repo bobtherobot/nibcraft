@@ -139,6 +139,7 @@ fn kind_mark(kind: TodoKind) -> (&'static str, &'static str) {
     match kind {
         TodoKind::Missing => ("m", "missing"),
         TodoKind::Fix => ("f", "fix"),
+        TodoKind::Changed => ("c", "changed"),
     }
 }
 

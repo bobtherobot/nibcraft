@@ -18,6 +18,8 @@ pub struct Pulled {
     /// Cursors the list gained and lost since the previous pull (empty on the first).
     pub added: Vec<String>,
     pub dropped: Vec<String>,
+    /// Cursors whose description this pull changed (empty on the first).
+    pub changed: Vec<String>,
     pub first: bool,
     pub seeded: Seeded,
 }
@@ -43,14 +45,25 @@ pub fn pull(root: &Path, args: &[String]) -> Result<Pulled, String> {
     let project = Project::at(root, &app.to_lowercase());
     let stamp = stamp(&app, &app_dir);
 
-    let before = match std::fs::read_to_string(project.manifest()) {
-        Ok(old) => Some(Manifest::parse(&old).map(|m| ids(&m)).unwrap_or_default()),
-        Err(_) => None,
-    };
+    let old_list = std::fs::read_to_string(project.manifest()).ok().map(|old| Manifest::parse(&old).ok());
+    let before = old_list.as_ref().map(|m| m.as_ref().map(ids).unwrap_or_default());
     let now = ids(&manifest);
     let (added, dropped) = match &before {
         Some(old) => (now.iter().filter(|id| !old.contains(id)).cloned().collect(), old.iter().filter(|id| !now.contains(id)).cloned().collect()),
         None => (vec![], vec![]),
+    };
+    // Changed: a description that differs from the last pull's, or a cursor new to the list whose
+    // drawing is already there (renamed), which wasn't drawn from this description either.
+    let changed: Vec<String> = match old_list.flatten() {
+        Some(old) => manifest
+            .designer_cursors()
+            .filter(|c| match old.designer_cursors().find(|o| o.id == c.id) {
+                Some(o) => o.description() != c.description(),
+                None => project.svg_dir().join(format!("{}.svg", c.id)).is_file(),
+            })
+            .map(|c| c.id.clone())
+            .collect(),
+        None => vec![],
     };
 
     for dir in [project.svg_dir(), project.state_dir()] {
@@ -58,12 +71,41 @@ pub fn pull(root: &Path, args: &[String]) -> Result<Pulled, String> {
     }
     write(&project.manifest(), &format!("{}{}", stamp_line(&stamp), without_stamp(&text)))?;
     write(&project.pull_from(), &format!("{}\n", app_dir.display()))?;
+    record_changes(&project, &now, &changed)?;
     if !project.notes().exists() {
         write(&project.notes(), &notes::template(&app))?;
     }
     project::set(root, &project.name)?;
     let seeded = if with_seeds { seeds::seed(&project, &app, &app_dir, &manifest) } else { Seeded::Skipped(NO_SEEDS.to_string()) };
-    Ok(Pulled { project, app, stamp, added, dropped, first: before.is_none(), seeded })
+    Ok(Pulled { project, app, stamp, added, dropped, changed, first: before.is_none(), seeded })
+}
+
+/// The fingerprint recorded for a changed cursor that had no drawing yet.
+pub const NOT_DRAWN: &str = "-";
+
+/// The cursors whose description changed in a pull, each with its drawing's fingerprint at the
+/// time ([`NOT_DRAWN`] if it had none), from `.nibcraft/changed`. One line per cursor: `id fingerprint`.
+pub fn changes(p: &Project) -> Vec<(String, String)> {
+    let text = std::fs::read_to_string(p.changed()).unwrap_or_default();
+    text.lines().filter_map(|l| l.split_once(' ')).map(|(id, fp)| (id.to_string(), fp.trim().to_string())).collect()
+}
+
+/// Add the cursors this pull `changed` to the record, with their drawings' fingerprints now, and
+/// drop the cursors no longer listed (`now`). An empty record removes the file.
+fn record_changes(p: &Project, now: &[String], changed: &[String]) -> Result<(), String> {
+    let mut record: Vec<(String, String)> = changes(p).into_iter().filter(|(id, _)| now.contains(id) && !changed.contains(id)).collect();
+    for id in changed {
+        let fp = std::fs::read(p.svg_dir().join(format!("{id}.svg"))).map(|b| crate::emit::fingerprint(&b)).unwrap_or_else(|_| NOT_DRAWN.to_string());
+        record.push((id.clone(), fp));
+    }
+    if record.is_empty() {
+        return match std::fs::remove_file(p.changed()) {
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(format!("{}: {e}", p.changed().display())),
+            _ => Ok(()),
+        };
+    }
+    let text: String = record.iter().map(|(id, fp)| format!("{id} {fp}\n")).collect();
+    write(&p.changed(), &text)
 }
 
 /// Has the app's cursor list changed since the project was last pulled? `None` when the app
@@ -165,6 +207,37 @@ mod tests {
         assert_eq!(std::fs::read_to_string(again.project.svg_dir().join("Pen.svg")).unwrap(), "mine");
         assert_eq!(std::fs::read_to_string(again.project.notes()).unwrap(), "my notes");
         assert_eq!(stale(&again.project), Some(false));
+    }
+
+    #[test]
+    fn a_pull_records_changed_descriptions_until_their_drawing_changes() {
+        let r = root("pull-changed");
+        let both = |pen: &str| format!("app = \"TestCraft\"\n\n[[cursor]]\nid = \"Pen\"\nshown_when = [\"{pen}\"]\nhotspot = \"Tip.\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso.\"]\nhotspot = \"Tip.\"\n");
+        let a = app(&r, &both("Pen."));
+        let first = pull(&r, &[a.display().to_string()]).unwrap();
+        assert!(first.changed.is_empty() && changes(&first.project).is_empty());
+        std::fs::write(first.project.svg_dir().join("Pen.svg"), "mine").unwrap();
+
+        std::fs::write(a.join(APP_MANIFEST), both("Pen, with a badge.")).unwrap();
+        let again = pull(&r, &[]).unwrap();
+        assert_eq!(again.changed, ["Pen"]);
+        assert_eq!(changes(&again.project), [("Pen".to_string(), crate::emit::fingerprint(b"mine"))]);
+
+        // A pull with nothing new keeps the record; a cursor that leaves the list leaves it.
+        let same = pull(&r, &[]).unwrap();
+        assert!(same.changed.is_empty());
+        assert_eq!(changes(&same.project).len(), 1);
+        std::fs::write(a.join(APP_MANIFEST), "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso, changed.\"]\nhotspot = \"Tip.\"\n").unwrap();
+        let gone = pull(&r, &[]).unwrap();
+        assert_eq!(gone.changed, ["Lasso"]);
+        assert_eq!(changes(&gone.project), [("Lasso".to_string(), NOT_DRAWN.to_string())]);
+
+        // A cursor new to the list whose drawing is already there (a renamed one) wasn't drawn
+        // from this description either.
+        std::fs::write(gone.project.svg_dir().join("Knife.svg"), "renamed").unwrap();
+        std::fs::write(a.join(APP_MANIFEST), "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso, changed.\"]\nhotspot = \"Tip.\"\n\n[[cursor]]\nid = \"Knife\"\nshown_when = [\"Knife.\"]\nhotspot = \"Tip.\"\n").unwrap();
+        let renamed = pull(&r, &[]).unwrap();
+        assert_eq!((renamed.added.clone(), renamed.changed.clone()), (vec!["Knife".to_string()], vec!["Knife".to_string()]));
     }
 
     #[test]

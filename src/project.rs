@@ -60,6 +60,10 @@ impl Project {
     pub fn handoff(&self) -> PathBuf {
         self.state_dir().join("handoff")
     }
+    /// The cursors whose description changed in a pull, until their drawing changes ([`crate::pull::changes`]).
+    pub fn changed(&self) -> PathBuf {
+        self.state_dir().join("changed")
+    }
     /// The seed `pull` writes for cursor `id` of `app`: `svg/Crosshair-vectorcraft-rendered.svg`.
     pub fn seed(&self, id: &str, app: &str) -> PathBuf {
         self.svg_dir().join(format!("{id}-{}-rendered.svg", app.to_lowercase()))

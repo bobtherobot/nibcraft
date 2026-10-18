@@ -9,6 +9,7 @@ pub fn render(app: &str, stamp: Option<&str>, m: &Manifest, r: &Report) -> Strin
     let status = |id: &str| match r.todos.iter().find(|t| t.id == id).map(|t| t.kind) {
         Some(TodoKind::Missing) => "to draw",
         Some(TodoKind::Fix) => "to fix",
+        Some(TodoKind::Changed) => "changed since last pull",
         None => "drawn",
     };
     // The seed `pull` wrote for a cursor, if any: one of the drawings the app doesn't use.
@@ -18,7 +19,7 @@ pub fn render(app: &str, stamp: Option<&str>, m: &Manifest, r: &Report) -> Strin
     };
     let count = |kind| r.todos.iter().filter(|t| t.kind == kind).count();
     let total = m.designer_cursors().count();
-    let (missing, fix) = (count(TodoKind::Missing), count(TodoKind::Fix));
+    let (missing, fix, changed) = (count(TodoKind::Missing), count(TodoKind::Fix), count(TodoKind::Changed));
 
     let mut out = format!("# {app} cursors\n\n");
     let from = stamp.map(|s| format!(" (pulled from {s})")).unwrap_or_default();
@@ -27,15 +28,17 @@ pub fn render(app: &str, stamp: Option<&str>, m: &Manifest, r: &Report) -> Strin
     if m.designer_cursors().any(|c| c.confidence().is_some()) {
         out.push_str(&format!("Some descriptions end with a confidence from 0 to 10: how sure {app} is of the description, from the research behind it. The higher it is, the more closely to follow the description; the lower, the more the drawing is yours, as long as it keeps the cursor's meaning and hotspot.\n\n"));
     }
-    out.push_str(&format!("{total} cursors: {} drawn, {missing} to draw, {fix} to fix.\n", total - missing - fix));
+    let changed_note = if changed > 0 { format!(", {changed} changed since last pull") } else { String::new() };
+    out.push_str(&format!("{total} cursors: {} drawn, {missing} to draw, {fix} to fix{changed_note}.\n", total - missing - fix));
 
-    for (kind, title) in [(TodoKind::Missing, "To draw"), (TodoKind::Fix, "To fix")] {
+    for (kind, title) in [(TodoKind::Missing, "To draw"), (TodoKind::Fix, "To fix"), (TodoKind::Changed, "Changed since last pull")] {
         let items: Vec<String> = r
             .todos
             .iter()
             .filter(|t| t.kind == kind)
             .map(|t| match kind {
                 TodoKind::Fix => format!("- {}: {}", t.id, t.description),
+                TodoKind::Changed => format!("- {}", t.id),
                 TodoKind::Missing => match seed(&t.id) {
                     Some(file) => format!("- {} (start from svg/{file}, how {app} draws it today)", t.id),
                     None => format!("- {}", t.id),
@@ -43,7 +46,11 @@ pub fn render(app: &str, stamp: Option<&str>, m: &Manifest, r: &Report) -> Strin
             })
             .collect();
         if !items.is_empty() {
-            out.push_str(&format!("\n## {title}\n\n{}\n", items.join("\n")));
+            let intro = match kind {
+                TodoKind::Changed => format!("{app} changed what these cursors must say after they were drawn. Check each drawing against its description below and redraw it where it no longer fits. A cursor leaves this list when its drawing changes; if a drawing already fits, delete its line from `.nibcraft/changed`.\n\n"),
+                _ => String::new(),
+            };
+            out.push_str(&format!("\n## {title}\n\n{intro}{}\n", items.join("\n")));
         }
     }
 
@@ -86,6 +93,19 @@ mod tests {
         assert!(md.contains("### Lasso · to draw") && md.contains("### Knife · to fix"), "{md}");
         assert!(md.contains("## Not needed") && md.contains("- **Liquify tools**: The app draws the brush."), "{md}");
         assert!(!md.contains("Confidence"), "no cursor is rated, so nothing explains the number: {md}");
+    }
+
+    #[test]
+    fn lists_cursors_changed_since_last_pull() {
+        let m = Manifest::parse("[[cursor]]\nid = \"Pen\"\ngroup = \"Pen\"\nshown_when = [\"Pen.\"]\nhotspot = \"Tip.\"\n").unwrap();
+        let svgs = vec![("Pen.svg".to_string(), NIB.to_vec())];
+        let mut r = assess(Ok(&m), svgs.clone());
+        crate::check::mark_changed(&mut r, &m, &[("Pen".into(), crate::emit::fingerprint(NIB))], &svgs);
+        let md = render("VectorCraft", None, &m, &r);
+        assert!(md.contains("1 cursors: 1 drawn, 0 to draw, 0 to fix, 1 changed since last pull."), "{md}");
+        assert!(md.contains("## Changed since last pull\n\n"), "{md}");
+        assert!(md.contains("\n- Pen\n"), "{md}");
+        assert!(md.contains("### Pen · changed since last pull"), "{md}");
     }
 
     #[test]
