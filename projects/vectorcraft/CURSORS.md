@@ -1,6 +1,6 @@
 # VectorCraft cursors
 
-The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (8b38965d, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
+The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (d3db88fa, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
 
 Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.
 
@@ -40,14 +40,15 @@ Look: The plain pointer: a solid arrow with a tail, like the operating system's 
 Shown when:
 - The Selection tool on the canvas: over empty canvas or over an unselected object (no Alt).
 - Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.
+- The Pen while dragging out handles, from a new anchor, the first anchor (closing the path) or the last one.
 
 Hotspot: The arrowhead's tip.
 
-Look: A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow. ArrowHollow is its hollow twin, and PathBracket and TypeWidget build on it. While dragging it says "a move is under way".
+Look: A solid arrowhead with no tail: the selection tools' pointer, unlike Arrow. SelectionArrowHollow is its hollow twin, and PathBracket and TypeWidget build on it. While dragging it says "a move is under way".
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
-### ArrowHollow · drawn
+### SelectionArrowHollow · drawn
 
 Shown when:
 - Direct Selection at rest where no other cursor applies: empty canvas, fills, handles, straight segments and frame edges.
@@ -69,7 +70,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: ArrowHollow with a small hollow square badge (an unselected anchor).
+Look: SelectionArrowHollow with a small hollow square badge (an unselected anchor).
 
 Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
@@ -80,7 +81,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: ArrowHollow with a small filled square badge (the anchor's path is selected). DirectAnchor is the same with the square hollow.
+Look: SelectionArrowHollow with a small filled square badge (the anchor's path is selected). DirectAnchor is the same with the square hollow.
 
 Confidence: 7/10 (follow its meaning and shape; the details are yours)
 
@@ -110,7 +111,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: ArrowHollow with a plus badge.
+Look: SelectionArrowHollow with a plus badge.
 
 Confidence: 6/10 (keep the meaning; the shape is yours)
 
@@ -150,7 +151,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: ArrowHollow with a rounded-corner badge.
+Look: SelectionArrowHollow with a rounded-corner badge.
 
 Confidence: 5/10 (keep the meaning; the shape is yours)
 
@@ -541,7 +542,7 @@ Shown when:
 
 Hotspot: The arrow's tip.
 
-Look: ArrowHollow with a lens badge (a stroke that swells in the middle). WidthAdd and WidthPoint build on it.
+Look: SelectionArrowHollow with a lens badge (a stroke that swells in the middle). WidthAdd and WidthPoint build on it.
 
 ### WidthAdd · drawn
 
