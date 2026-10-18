@@ -1,4 +1,4 @@
-# Pulled from VectorCraft 0.12.0 (0d9fc1b1, 2026-10-17). Don't edit: `nibcraft pull` rewrites this file.
+# Pulled from VectorCraft 0.12.0 (01f85279, 2026-10-17). Don't edit: `nibcraft pull` rewrites this file.
 # The cursors VectorCraft needs: one [[cursor]] per `Cursor` value (crates/tools/src/lib.rs).
 #
 # This is the source of truth. nibcraft's `pull` turns it into CURSORS.md for designers, and

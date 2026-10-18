@@ -2,9 +2,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32" height="32" viewBox="0 0 32 32">
   <title>Lasso.svg</title>
   <g id="Layer_1" data-name="Layer 1">
-    <path id="hotspot" d="M4.5 4 C4.5 4.276 4.276 4.5 4 4.5 C3.724 4.5 3.5 4.276 3.5 4 C3.5 3.724 3.724 3.5 4 3.5 C4.276 3.5 4.5 3.724 4.5 4 Z" fill="#ff0000"/>
-    <path d="M9.569 16.827 L4.3 21.341 L4.3 4.68 L16.465 16.064 Z" fill="#000000" stroke="#1b1818" stroke-miterlimit="10"/>
     <path id="loop" d="M30.549 21.966 C30.549 24.036 27.939 25.715 24.719 25.715 C21.499 25.715 18.888 24.036 18.888 21.966 C18.888 19.897 21.499 18.218 24.719 18.218 C27.939 18.218 30.549 19.897 30.549 21.966 Z" fill="none" stroke="#000000" stroke-width="1.2"/>
     <path id="rope" d="M19.721 24.049 C18.472 26.131 20.971 27.38 18.472 29.463" fill="none" stroke="#000000" stroke-width="1.2"/>
+    <path id="hotspot" d="M4.5 4 C4.5 4.276 4.276 4.5 4 4.5 C3.724 4.5 3.5 4.276 3.5 4 C3.5 3.724 3.724 3.5 4 3.5 C4.276 3.5 4.5 3.724 4.5 4 Z" fill="#ff0000"/>
+    <path d="M9.131 16.752 L15.654 16.752 L4.321 4.826 L4.453 21.278 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10"/>
   </g>
 </svg>
