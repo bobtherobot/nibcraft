@@ -1,6 +1,6 @@
 # VectorCraft cursors
 
-The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (76116cd1, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
+The cursors VectorCraft needs, from its cursor list (pulled from VectorCraft 0.12.0 (c94d02f7, 2026-10-18)). Don't edit this file: nibcraft rewrites it on every `pull` and `check`. Notes for VectorCraft's developers go in DESIGNER_NOTES.md.
 
 Draw each cursor as `svg/<id>.svg` from its description below, never from another app's cursors. Read DRAWING-GUIDE.md (in nibcraft's top folder) first.
 
@@ -57,7 +57,6 @@ VectorCraft changed what these cursors must say after they were drawn. Check eac
 
 Shown when:
 - Any tool with no cursor of its own (Touch Type, Rotate View).
-- The resting state of Live Paint Selection, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.
 - Outside the canvas (menus, panels, the toolbar) the operating system's own pointer shows instead.
 
 Hotspot: The arrow's tip.
@@ -70,6 +69,7 @@ Shown when:
 - The Selection tool on the canvas: over empty canvas or over an unselected object (no Alt).
 - Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.
 - The Pen while dragging out handles, from a new anchor, the first anchor (closing the path) or the last one.
+- The resting state of tools that manipulate art: Live Paint Selection, Intertwine, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.
 
 Hotspot: The arrowhead's tip.
 

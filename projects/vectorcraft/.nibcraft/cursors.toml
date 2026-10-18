@@ -1,4 +1,4 @@
-# Pulled from VectorCraft 0.12.0 (76116cd1, 2026-10-18). Don't edit: `nibcraft pull` rewrites this file.
+# Pulled from VectorCraft 0.12.0 (c94d02f7, 2026-10-18). Don't edit: `nibcraft pull` rewrites this file.
 # The cursors VectorCraft needs: one [[cursor]] per `Cursor` value (crates/tools/src/lib.rs).
 #
 # This is the source of truth. nibcraft's `pull` turns it into CURSORS.md for designers, and
@@ -42,7 +42,6 @@ id = "Arrow"
 group = "Selection"
 shown_when = [
     "Any tool with no cursor of its own (Touch Type, Rotate View).",
-    "The resting state of Live Paint Selection, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.",
     "Outside the canvas (menus, panels, the toolbar) the operating system's own pointer shows instead.",
 ]
 hotspot = "The arrow's tip."
@@ -55,6 +54,7 @@ shown_when = [
     "The Selection tool on the canvas: over empty canvas or over an unselected object (no Alt).",
     "Dragging with the Selection tool (a move), or with Direct Selection (anchors, a straight segment, a handle or a whole path), until the drag snaps.",
     "The Pen while dragging out handles, from a new anchor, the first anchor (closing the path) or the last one.",
+    "The resting state of tools that manipulate art: Live Paint Selection, Intertwine, Reshape (away from a selected path), Free Transform, Puppet Warp and Crop Image (nothing selected or outside the box), the Perspective Grid (locked or away from handles) and Perspective Selection.",
 ]
 hotspot = "The arrowhead's tip."
 confidence = 6
