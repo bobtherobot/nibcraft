@@ -1,5 +1,6 @@
-//! An HTML swatch book of a project's drawings, drawn the way `runtime/glyph.rs`'s `draw_glyph`
-//! draws them, so the designer sees each cursor as the app will before handing it over.
+//! An HTML swatch book of a project's drawings, drawn the way VectorCraft's `draw_glyph`
+//! (`crates/ui-egui/src/cursors.rs`) draws them, so the designer sees each cursor as the app will
+//! before pushing it.
 
 use crate::check::{Todo, TodoKind};
 use crate::emit::const_name;

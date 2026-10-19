@@ -1,16 +1,27 @@
-//! Seeds: how the app draws a cursor nobody has drawn yet, as a starting point. `pull` runs the
-//! command the app's cursor list names (`seeds = [...]`) in the app's checkout, and writes each
-//! cursor it gets back as `svg/<id>-<app>-rendered.svg`, unless `svg/<id>.svg` exists already.
+//! Seeds: how the app draws, in its own code, a cursor nobody has drawn yet, as a starting point.
+//! `pull` writes each as `svg/<id>-<app>-rendered.svg`. The app has no part in this: nibcraft makes
+//! a scratch git worktree of the app's checkout under its own `target/seeds/` (uncommitted changes
+//! included), drops its own drawing module into it ([`MODULE`]), runs it there as a test, and
+//! resets the worktree on the next pull. The worktree and its build stay, so later pulls only
+//! rebuild what changed.
 //!
 //! Seeds are rewritten by every pull, so nobody draws in them: the designer copies one to
-//! `<id>.svg` and draws there. The app ignores them (only `<id>.svg` is a drawing). Seeds of
-//! cursors that have been drawn since are left as they are, for reference.
+//! `<id>.svg` and draws there. The app ignores them (only `<id>.svg` is a drawing).
 
-use crate::manifest::Manifest;
 use crate::parse::SEED_NOTE_ID;
 use crate::project::Project;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+/// The module nibcraft drops into the app's `cursors` module to draw its code-drawn cursors.
+const MODULE: &str = include_str!("../runtime/vectorcraft_seeds.rs");
+/// Where it goes, the file whose `mod` list gets it, and the line it goes after.
+const MODULE_AT: &str = "crates/ui-egui/src/cursors/nibcraft_seeds.rs";
+const CURSORS_RS: &str = "crates/ui-egui/src/cursors.rs";
+const AFTER: &str = "mod glyphs;\n";
+/// The crate and test that write the seeds.
+const CRATE: &str = "vectorcraft-ui-egui";
+const TEST: &str = "cursors::nibcraft_seeds::write_seeds";
 
 /// What seeding did.
 #[derive(Debug, PartialEq)]
@@ -21,50 +32,105 @@ pub enum Seeded {
     Skipped(String),
 }
 
-/// Run the app's seed command and write its drawings into the project as seeds. Progress (the
-/// app's build) goes to the terminal as it happens.
-pub fn seed(p: &Project, app: &str, app_dir: &Path, m: &Manifest) -> Seeded {
-    let Some((program, args)) = m.seeds.as_deref().and_then(<[String]>::split_first) else {
-        return Seeded::Skipped(format!("{app}'s cursor list names no seed command"));
-    };
-    let tmp = p.state_dir().join("seeds-tmp");
-    let _ = std::fs::remove_dir_all(&tmp); // A leftover from an interrupted pull, if any.
-    // Absolute: the command runs in the app's checkout, not here.
-    let tmp = match std::fs::create_dir_all(&tmp).and_then(|()| tmp.canonicalize()) {
-        Ok(tmp) => tmp,
-        Err(e) => return Seeded::Skipped(format!("{}: {e}", tmp.display())),
-    };
-    eprintln!("Getting {app}'s own cursor drawings: building {app} first. The first time this takes a few minutes; later pulls are quick.");
-    eprintln!("Running `{} {} {}` in {}", program, args.join(" "), tmp.display(), app_dir.display());
-    let status = Command::new(program).args(args).arg(&tmp).current_dir(app_dir).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::inherit()).status();
-    let result = match status {
-        Ok(s) if s.success() => match std::fs::read_dir(&tmp).map(|d| d.count()) {
-            Ok(0) => Seeded::Skipped(format!("{app}'s seed command wrote no drawings")),
-            _ => place(p, app, m, &tmp).map_or_else(Seeded::Skipped, |(written, failed)| Seeded::Written(written, failed)),
-        },
-        Ok(s) => Seeded::Skipped(format!("{app}'s seed command failed ({s}); see its output above")),
-        Err(e) => Seeded::Skipped(format!("couldn't run `{program}`: {e}")),
-    };
-    let _ = std::fs::remove_dir_all(&tmp); // Only scratch: a leftover is cleared by the next pull.
-    result
+/// Where nibcraft keeps its scratch worktree of the app, the build of it, and what it draws.
+/// Absolute, since git and cargo run elsewhere: a relative path would land in the app's checkout.
+fn scratch(root: &Path, p: &Project) -> Result<(PathBuf, PathBuf, PathBuf), String> {
+    let dir = std::path::absolute(root.join("target").join("seeds")).map_err(|e| format!("{}: {e}", root.display()))?;
+    Ok((dir.join(&p.name), dir.join("target"), dir.join(format!("{}-drawn", p.name))))
 }
 
-/// Write each `<id>.svg` in `dir` that the app wants and nobody has drawn as `id`'s seed: the ids
-/// written, and a message for each seed that couldn't be (the others are still written).
-fn place(p: &Project, app: &str, m: &Manifest, dir: &Path) -> Result<(Vec<String>, Vec<String>), String> {
-    let entries = std::fs::read_dir(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
-    let (mut written, mut failed) = (vec![], vec![]);
-    for path in entries.filter_map(|e| e.ok()).map(|e| e.path()) {
-        let Some(id) = path.file_name().and_then(|n| n.to_str()).and_then(|n| n.strip_suffix(".svg")) else { continue };
-        if !m.wants(id) || p.svg_dir().join(format!("{id}.svg")).exists() {
-            continue;
+/// Write the seeds of `ids` (cursors with no drawing and no glyph in the app): build the app's
+/// code-drawn cursors in the scratch worktree and keep the ones asked for. Progress (the build)
+/// goes to the terminal as it happens.
+pub fn seed(root: &Path, p: &Project, app: &str, app_dir: &Path, ids: &[String]) -> Seeded {
+    if ids.is_empty() {
+        return Seeded::Written(vec![], vec![]);
+    }
+    let (worktree, target, out) = match scratch(root, p) {
+        Ok(paths) => paths,
+        Err(e) => return Seeded::Skipped(e),
+    };
+    let _ = std::fs::remove_dir_all(&out); // A leftover from an interrupted pull, if any.
+    let result = (|| {
+        let worktree = prepare(app_dir, &worktree)?;
+        std::fs::create_dir_all(&out).map_err(|e| format!("{}: {e}", out.display()))?;
+        let out = out.canonicalize().map_err(|e| format!("{}: {e}", out.display()))?;
+        eprintln!("Getting {app}'s own drawings of {} cursors: building {app} in {}.", ids.len(), worktree.display());
+        eprintln!("The first time this takes several minutes; later pulls are quicker.");
+        let status = Command::new(std::env::var("CARGO").unwrap_or_else(|_| "cargo".into()))
+            .args(["test", "-q", "-p", CRATE, "--lib", TEST, "--", "--ignored", "--exact"])
+            .env("CARGO_TARGET_DIR", &target)
+            .env("NIBCRAFT_SEEDS_DIR", &out)
+            .current_dir(&worktree)
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::inherit())
+            .status()
+            .map_err(|e| format!("couldn't run cargo: {e}"))?;
+        if !status.success() {
+            return Err(format!("building {app}'s drawings failed ({status}); see the output above"));
         }
+        place(p, app, ids, &out)
+    })();
+    let _ = std::fs::remove_dir_all(&out); // Only scratch: a leftover is cleared by the next pull.
+    result.map_or_else(Seeded::Skipped, |(written, failed)| Seeded::Written(written, failed))
+}
+
+fn git(dir: &Path, args: &[&str]) -> Result<String, String> {
+    let out = Command::new("git").arg("-C").arg(dir).args(args).output().map_err(|e| format!("couldn't run git: {e}"))?;
+    if out.status.success() {
+        Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
+    } else {
+        Err(format!("git {} in {}: {}", args.join(" "), dir.display(), String::from_utf8_lossy(&out.stderr).trim()))
+    }
+}
+
+/// Bring the scratch worktree at `worktree` to the app checkout's current state, uncommitted
+/// changes to tracked files included, with nibcraft's module dropped in. Returns its absolute path.
+fn prepare(app_dir: &Path, worktree: &Path) -> Result<PathBuf, String> {
+    // A commit of the working tree as it is, without touching it; empty when nothing's changed.
+    let snapshot = git(app_dir, &["stash", "create"])?;
+    let commit = if snapshot.is_empty() { git(app_dir, &["rev-parse", "HEAD"])? } else { snapshot };
+    if worktree.join(".git").exists() {
+        git(worktree, &["checkout", "--quiet", "--detach", "--force", &commit])?;
+    } else {
+        let _ = std::fs::remove_dir_all(worktree); // Not a worktree: whatever's there is ours.
+        let parent = worktree.parent().ok_or("no folder for the scratch worktree")?;
+        std::fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;
+        git(app_dir, &["worktree", "prune"])?;
+        let at = worktree.to_string_lossy();
+        git(app_dir, &["worktree", "add", "--quiet", "--detach", &at, &commit])?;
+    }
+    let worktree = worktree.canonicalize().map_err(|e| format!("{}: {e}", worktree.display()))?;
+    let cursors = worktree.join(CURSORS_RS);
+    let text = std::fs::read_to_string(&cursors).map_err(|e| format!("{}: {e}", cursors.display()))?;
+    let Some(i) = text.find(AFTER) else {
+        return Err(format!("{CURSORS_RS} has no `{}` line any more: nibcraft's seeds need updating to match it", AFTER.trim()));
+    };
+    let at = i + AFTER.len();
+    let with_module = format!("{}#[cfg(test)]\nmod nibcraft_seeds;\n{}", &text[..at], &text[at..]);
+    std::fs::write(&cursors, with_module).map_err(|e| format!("{}: {e}", cursors.display()))?;
+    let module = worktree.join(MODULE_AT);
+    if let Some(dir) = module.parent() {
+        std::fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    }
+    std::fs::write(&module, MODULE).map_err(|e| format!("{}: {e}", module.display()))?;
+    Ok(worktree)
+}
+
+/// Write each of `ids` the app drew into `dir` as that cursor's seed: the ids written, and a
+/// message for each seed that couldn't be (the others are still written).
+fn place(p: &Project, app: &str, ids: &[String], dir: &Path) -> Result<(Vec<String>, Vec<String>), String> {
+    let (mut written, mut failed) = (vec![], vec![]);
+    for id in ids {
+        let from = dir.join(format!("{id}.svg"));
+        let Ok(svg) = std::fs::read_to_string(&from) else {
+            continue;
+        }; // Not drawn in code (it borrows a look).
         let to = p.seed(id, app);
-        match std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display())).and_then(|svg| {
-            std::fs::write(&to, with_warning(&svg, id, app)).map_err(|e| format!("{}: {e}", to.display()))
-        }) {
-            Ok(()) => written.push(id.to_string()),
-            Err(e) => failed.push(e),
+        match std::fs::write(&to, with_warning(&svg, id, app)) {
+            Ok(()) => written.push(id.clone()),
+            Err(e) => failed.push(format!("{}: {e}", to.display())),
         }
     }
     written.sort();
@@ -74,7 +140,9 @@ fn place(p: &Project, app: &str, m: &Manifest, dir: &Path) -> Result<(Vec<String
 /// The seed with a comment at the top saying not to draw in it, and the same in red text at the
 /// canvas's top left, which a drawing program shows (nibcraft never draws it: [`SEED_NOTE_ID`]).
 fn with_warning(svg: &str, id: &str, app: &str) -> String {
-    let warning = format!("<!-- Seed: how {app} draws {id} today. Don't draw in this file: every `nibcraft pull` overwrites it. Copy it to {id}.svg and draw there. -->\n");
+    let warning = format!(
+        "<!-- Seed: how {app} draws {id} today. Don't draw in this file: every `nibcraft pull` overwrites it. Copy it to {id}.svg and draw there. -->\n"
+    );
     let svg = match svg.split_once('\n') {
         Some((first, rest)) if first.starts_with("<?xml") => format!("{first}\n{warning}{rest}"),
         _ => format!("{warning}{svg}"),
@@ -95,7 +163,6 @@ mod tests {
     use super::*;
     use crate::project::tests::root;
 
-    const LIST: &str = "app = \"TestCraft\"\n[[cursor]]\nid = \"Cross\"\n[[cursor]]\nid = \"Pen\"\n[[cursor]]\nid = \"Busy\"\ndesigner = false\n";
     const SVG: &str = "<?xml version=\"1.0\"?>\n<svg>\n</svg>\n";
 
     fn project(name: &str) -> Project {
@@ -106,74 +173,76 @@ mod tests {
     }
 
     #[test]
-    fn seeds_are_written_for_wanted_cursors_nobody_has_drawn() {
+    fn seeds_are_written_for_the_ids_asked_that_the_app_drew() {
         let p = project("seed-place");
         let dir = p.dir.join("out");
         std::fs::create_dir_all(&dir).unwrap();
-        for id in ["Cross", "Pen", "Busy", "Unlisted"] {
+        for id in ["Cross", "Pen"] {
             std::fs::write(dir.join(format!("{id}.svg")), SVG).unwrap();
         }
-        std::fs::write(p.svg_dir().join("Pen.svg"), "mine").unwrap();
-        let m = Manifest::parse(LIST).unwrap();
-        assert_eq!(place(&p, "TestCraft", &m, &dir).unwrap(), (vec!["Cross".to_string()], vec![]));
+        let ids = ["Cross".to_string(), "Borrowed".to_string()];
+        assert_eq!(place(&p, "TestCraft", &ids, &dir).unwrap(), (vec!["Cross".to_string()], vec![]));
         let seed = std::fs::read_to_string(p.svg_dir().join("Cross-testcraft-rendered.svg")).unwrap();
         assert!(seed.starts_with("<?xml version=\"1.0\"?>\n<!-- Seed: how TestCraft draws Cross today. Don't draw in this file"), "{seed}");
         assert!(seed.contains("<g id=\"seed-note\"") && seed.contains(">To draw, save a copy as Cross.svg.</text>"), "{seed}");
-        assert_eq!(std::fs::read_to_string(p.svg_dir().join("Pen.svg")).unwrap(), "mine");
-        assert!(!p.svg_dir().join("Pen-testcraft-rendered.svg").exists() && !p.svg_dir().join("Busy-testcraft-rendered.svg").exists());
+        assert!(!p.svg_dir().join("Pen-testcraft-rendered.svg").exists(), "only the ids asked for");
     }
 
     #[test]
-    fn every_pull_overwrites_a_seed_but_keeps_the_seed_of_a_cursor_drawn_since() {
-        let p = project("seed-again");
-        let dir = p.dir.join("out");
-        std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(dir.join("Cross.svg"), SVG).unwrap();
-        let m = Manifest::parse(LIST).unwrap();
-        let seed = p.seed("Cross", "TestCraft");
-        std::fs::write(&seed, "edited by mistake").unwrap();
-        place(&p, "TestCraft", &m, &dir).unwrap();
-        assert!(std::fs::read_to_string(&seed).unwrap().contains("Seed:"), "overwritten");
-        std::fs::write(&seed, "kept for reference").unwrap();
-        std::fs::write(p.svg_dir().join("Cross.svg"), "drawn").unwrap();
-        assert_eq!(place(&p, "TestCraft", &m, &dir).unwrap(), (vec![], vec![]));
-        assert_eq!(std::fs::read_to_string(&seed).unwrap(), "kept for reference");
+    fn the_scratch_folders_are_absolute_whatever_the_root() {
+        let (worktree, target, out) = scratch(Path::new("."), &Project::at(Path::new("."), "testcraft")).unwrap();
+        assert!(worktree.is_absolute() && target.is_absolute() && out.is_absolute());
+        assert!(worktree.ends_with("target/seeds/testcraft"), "{}", worktree.display());
     }
 
     #[test]
-    fn a_list_without_a_seed_command_skips_seeding() {
+    fn nothing_to_seed_builds_nothing() {
         let p = project("seed-none");
-        let m = Manifest::parse(LIST).unwrap();
-        assert!(matches!(seed(&p, "TestCraft", &p.dir, &m), Seeded::Skipped(why) if why.contains("no seed command")));
+        assert_eq!(seed(&p.dir, &p, "TestCraft", Path::new("/nonexistent"), &[]), Seeded::Written(vec![], vec![]));
     }
 
-    /// `dir` relative to the working directory, by enough `..` to reach the root.
-    #[cfg(unix)]
-    fn pathdiff(dir: &Path) -> std::path::PathBuf {
-        let up = std::env::current_dir().unwrap().components().count() - 1;
-        let mut rel = std::path::PathBuf::new();
-        for _ in 0..up {
-            rel.push("..");
+    /// A git repository standing in for the app, with a `cursors.rs` that has the `mod` line.
+    fn app(r: &Path, cursors: &str) -> PathBuf {
+        let a = r.join("app");
+        std::fs::create_dir_all(a.join("crates/ui-egui/src/cursors")).unwrap();
+        std::fs::write(a.join(CURSORS_RS), cursors).unwrap();
+        for args in [
+            &["init", "--quiet"][..],
+            &["config", "user.name", "Test"],
+            &["config", "user.email", "t@example.com"],
+            &["config", "commit.gpgsign", "false"],
+        ] {
+            git(&a, args).unwrap();
         }
-        rel.join(dir.strip_prefix("/").unwrap())
+        git(&a, &["add", "."]).unwrap();
+        git(&a, &["commit", "--quiet", "-m", "app"]).unwrap();
+        a
     }
 
-    #[cfg(unix)]
     #[test]
-    fn the_command_runs_in_the_app_checkout_with_the_folder_added() {
-        let p = project("seed-run");
-        // A project named by a relative path (nibcraft runs from its own folder) still gets
-        // the drawings: the command is given the folder's absolute path.
-        let p = Project { name: p.name, dir: pathdiff(&p.dir) };
-        let list = format!("seeds = [\"sh\", \"-c\", \"cp seed.svg \\\"$0/Cross.svg\\\"\"]\n{LIST}");
-        let m = Manifest::parse(&list).unwrap();
-        let app = p.dir.join("app");
-        std::fs::create_dir_all(&app).unwrap();
-        std::fs::write(app.join("seed.svg"), SVG).unwrap();
-        assert_eq!(seed(&p, "TestCraft", &app, &m), Seeded::Written(vec!["Cross".into()], vec![]));
-        assert!(p.seed("Cross", "TestCraft").is_file());
-        assert!(!p.state_dir().join("seeds-tmp").exists(), "the scratch folder is removed");
-        let failing = Manifest::parse(&format!("seeds = [\"false\"]\n{LIST}")).unwrap();
-        assert!(matches!(seed(&p, "TestCraft", &app, &failing), Seeded::Skipped(why) if why.contains("failed")));
+    fn the_worktree_follows_the_app_uncommitted_changes_included_and_gets_the_module() {
+        let r = root("seed-worktree");
+        let a = app(&r, "mod glyphs;\nfn glyph() {}\n");
+        let wt = r.join("target/seeds/testcraft");
+        let got = prepare(&a, &wt).unwrap();
+        let cursors = std::fs::read_to_string(got.join(CURSORS_RS)).unwrap();
+        assert_eq!(cursors, "mod glyphs;\n#[cfg(test)]\nmod nibcraft_seeds;\nfn glyph() {}\n");
+        assert_eq!(std::fs::read_to_string(got.join(MODULE_AT)).unwrap(), MODULE);
+        assert_eq!(git(&a, &["status", "--porcelain"]).unwrap(), "", "the app's checkout is untouched");
+
+        // An uncommitted change in the app reaches the worktree; the module goes in once.
+        std::fs::write(a.join(CURSORS_RS), "mod glyphs;\nfn glyph() { /* changed */ }\n").unwrap();
+        let again = prepare(&a, &wt).unwrap();
+        let cursors = std::fs::read_to_string(again.join(CURSORS_RS)).unwrap();
+        assert_eq!(cursors, "mod glyphs;\n#[cfg(test)]\nmod nibcraft_seeds;\nfn glyph() { /* changed */ }\n");
+        assert_eq!(std::fs::read_to_string(a.join(CURSORS_RS)).unwrap(), "mod glyphs;\nfn glyph() { /* changed */ }\n");
+    }
+
+    #[test]
+    fn an_app_reorganised_past_the_module_line_is_named() {
+        let r = root("seed-reorganised");
+        let a = app(&r, "fn glyph() {}\n");
+        let e = prepare(&a, &r.join("target/seeds/testcraft")).unwrap_err();
+        assert!(e.contains("need updating"), "{e}");
     }
 }

@@ -1,7 +1,13 @@
-//! `nibcraft pull [PATH/TO/APP] [--no-seeds]`: copy the app's cursor list into its project,
-//! creating the project the first time, and write the seeds ([`crate::seeds`]). Safe to run at any
-//! time: it never touches a drawing.
+//! `nibcraft pull [PATH/TO/APP] [--no-seeds]`: bring the project level with the app, creating it
+//! the first time. The app is the source of truth: pull copies its cursor list in, writes each
+//! cursor the app ships as a drawing (`svg/<id>.svg`, from its glyph), replaces a drawing whose
+//! glyph changed in the app since the last pull or push, and writes the seeds ([`crate::seeds`]).
+//!
+//! A drawing that differs from the app's glyph is kept when the app's glyph hasn't changed since
+//! the last pull or push (`.nibcraft/shipped`): that's the designer's work not pushed yet. Anything
+//! else is replaced: commit your work along the way.
 
+use crate::app_glyphs::{self, ENUM_RS, GLYPHS_RS, GlyphsFile};
 use crate::check::{stamp_line, without_stamp};
 use crate::manifest::{APP_MANIFEST, Manifest};
 use crate::notes;
@@ -21,7 +27,19 @@ pub struct Pulled {
     /// Cursors whose description this pull changed (empty on the first).
     pub changed: Vec<String>,
     pub first: bool,
+    pub synced: Synced,
     pub seeded: Seeded,
+}
+
+/// What a pull did to the drawings to bring them level with the app, by cursor id.
+#[derive(Debug, Default, PartialEq)]
+pub struct Synced {
+    /// Shipped by the app and not drawn here: written from the app's glyph.
+    pub written: Vec<String>,
+    /// Their glyph changed in the app since the last pull or push: replaced by it.
+    pub replaced: Vec<String>,
+    /// The app no longer ships a glyph for them: their drawing is removed.
+    pub removed: Vec<String>,
 }
 
 /// The flag that skips the seeds (and the app's build they need).
@@ -34,13 +52,17 @@ pub fn pull(root: &Path, args: &[String]) -> Result<Pulled, String> {
     let current = project::current(root).map(|n| Project::at(root, &n));
     let app_dir = match args[..] {
         [path] => PathBuf::from(path.trim_end_matches('/')),
-        [] => current.and_then(|p| p.app_dir()).ok_or("pull needs the path to the app's checkout the first time, e.g. `nibcraft pull ../vectorcraft`")?,
+        [] => current
+            .and_then(|p| p.app_dir())
+            .ok_or("pull needs the path to the app's checkout the first time, e.g. `nibcraft pull ../vectorcraft`")?,
         _ => return Err(format!("pull takes one path, to the app's checkout, and optionally {NO_SEEDS}")),
     };
     let app_dir = app_dir.canonicalize().map_err(|e| format!("{}: {e}", app_dir.display()))?;
     let list_path = app_dir.join(APP_MANIFEST);
-    let text = std::fs::read_to_string(&list_path).map_err(|e| format!("{}: {e} (is this an app checkout with a cursor list?)", list_path.display()))?;
+    let text =
+        std::fs::read_to_string(&list_path).map_err(|e| format!("{}: {e} (is this an app checkout with a cursor list?)", list_path.display()))?;
     let manifest = Manifest::parse(&text)?;
+    let glyphs = read_glyphs(&app_dir)?;
     let app = manifest.app.clone().unwrap_or_else(|| app_dir.file_name().and_then(|n| n.to_str()).unwrap_or("app").to_string());
     let project = Project::at(root, &app.to_lowercase());
     let stamp = stamp(&app, &app_dir);
@@ -75,9 +97,122 @@ pub fn pull(root: &Path, args: &[String]) -> Result<Pulled, String> {
     if !project.notes().exists() {
         write(&project.notes(), &notes::template(&app))?;
     }
+    let synced = sync(&project, &manifest, &glyphs, &app)?;
+    write_shipped(&project, &manifest, &glyphs)?;
+    // Older nibcraft's record of what `ready` handed over: `shipped` does its job now.
+    let _ = std::fs::remove_file(project.state_dir().join("handoff"));
     project::set(root, &project.name)?;
-    let seeded = if with_seeds { seeds::seed(&project, &app, &app_dir, &manifest) } else { Seeded::Skipped(NO_SEEDS.to_string()) };
-    Ok(Pulled { project, app, stamp, added, dropped, changed, first: before.is_none(), seeded })
+
+    // Seeds for the cursors nobody has drawn yet, here or in the app; the others' old seeds go.
+    let to_seed: Vec<String> =
+        manifest.designer_cursors().filter(|c| glyphs.get(&c.id).is_none() && !drawing(&project, &c.id).is_file()).map(|c| c.id.clone()).collect();
+    for c in manifest.designer_cursors().filter(|c| !to_seed.contains(&c.id)) {
+        let _ = std::fs::remove_file(project.seed(&c.id, &app)); // Usually not there.
+    }
+    let seeded = if with_seeds { seeds::seed(root, &project, &app, &app_dir, &to_seed) } else { Seeded::Skipped(NO_SEEDS.to_string()) };
+    Ok(Pulled { project, app, stamp, added, dropped, changed, first: before.is_none(), synced, seeded })
+}
+
+/// Cursor `id`'s drawing in project `p`.
+fn drawing(p: &Project, id: &str) -> PathBuf {
+    p.svg_dir().join(format!("{id}.svg"))
+}
+
+/// The app's generated glyphs, from its checkout at `app_dir`.
+pub fn read_glyphs(app_dir: &Path) -> Result<GlyphsFile, String> {
+    let path = app_dir.join(GLYPHS_RS);
+    let text = std::fs::read_to_string(&path)
+        .map_err(|e| format!("{}: {e} (is this a VectorCraft checkout with generated cursor glyphs?)", path.display()))?;
+    GlyphsFile::parse(&text)
+}
+
+/// The app's `Cursor` values, in order, from its checkout at `app_dir`.
+pub fn read_variants(app_dir: &Path) -> Result<Vec<app_glyphs::Variant>, String> {
+    let path = app_dir.join(ENUM_RS);
+    let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let v = app_glyphs::variants(&text);
+    if v.is_empty() {
+        return Err(format!("{}: can't find `pub enum Cursor`; was it moved? nibcraft needs updating to match it", path.display()));
+    }
+    Ok(v)
+}
+
+/// Bring `p`'s drawings of `m`'s cursors level with the app's `glyphs`; see the module's doc.
+fn sync(p: &Project, m: &Manifest, glyphs: &GlyphsFile, app: &str) -> Result<Synced, String> {
+    let shipped = shipped(p);
+    let mut out = Synced::default();
+    for c in m.designer_cursors() {
+        let path = drawing(p, &c.id);
+        let bytes = match std::fs::read(&path) {
+            Ok(b) => Some(b),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => None,
+            Err(e) => return Err(format!("{}: {e}", path.display())),
+        };
+        let before = shipped.iter().find(|(id, _)| *id == c.id).map(|(_, fp)| fp.as_str());
+        match (glyphs.get(&c.id), bytes) {
+            (Some(g), None) => {
+                write(&path, &app_glyphs::svg(g, app)?)?;
+                out.written.push(c.id.clone());
+            }
+            // The same, or the designer's work on a glyph the app hasn't changed since: keep it.
+            (Some(g), Some(b)) if app_glyphs::same(&b, g) || before == Some(g.fingerprint().as_str()) => {}
+            (Some(g), Some(_)) => {
+                write(&path, &app_glyphs::svg(g, app)?)?;
+                out.replaced.push(c.id.clone());
+            }
+            // Shipped at the last pull or push, and taken out of the app since.
+            (None, Some(_)) if before.is_some() => {
+                std::fs::remove_file(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+                out.removed.push(c.id.clone());
+            }
+            (None, _) => {}
+        }
+    }
+    Ok(out)
+}
+
+/// The app's glyphs as of the last pull or push, from `.nibcraft/shipped`: (id, [`AppGlyph::fingerprint`]).
+///
+/// [`AppGlyph::fingerprint`]: app_glyphs::AppGlyph::fingerprint
+pub fn shipped(p: &Project) -> Vec<(String, String)> {
+    let text = std::fs::read_to_string(p.shipped()).unwrap_or_default();
+    text.lines().filter(|l| !l.starts_with('#')).filter_map(|l| l.split_once(' ')).map(|(id, fp)| (id.to_string(), fp.trim().to_string())).collect()
+}
+
+/// The app's glyphs of `m`'s cursors as they are now: what [`shipped`] reads back.
+fn shipped_now(m: &Manifest, glyphs: &GlyphsFile) -> Vec<(String, String)> {
+    m.designer_cursors().filter_map(|c| glyphs.get(&c.id)).map(|g| (g.id.clone(), g.fingerprint())).collect()
+}
+
+/// Record the app's glyphs of `m`'s cursors as they are now.
+pub fn write_shipped(p: &Project, m: &Manifest, glyphs: &GlyphsFile) -> Result<(), String> {
+    let mut text = String::from("# The app's glyphs as of the last `nibcraft pull` or `push`; don't edit. id fingerprint\n");
+    for (id, fp) in shipped_now(m, glyphs) {
+        text.push_str(&format!("{id} {fp}\n"));
+    }
+    write(&p.shipped(), &text)
+}
+
+/// Why the app checkout at `app_dir` is ahead of the project's last pull or push, in plain words;
+/// empty when it isn't.
+pub fn behind(p: &Project, app_dir: &Path) -> Result<Vec<String>, String> {
+    let list = std::fs::read_to_string(app_dir.join(APP_MANIFEST)).map_err(|e| format!("{}: {e}", app_dir.join(APP_MANIFEST).display()))?;
+    let ours = std::fs::read_to_string(p.manifest()).map_err(|e| format!("{}: {e}", p.manifest().display()))?;
+    let mut out = vec![];
+    if without_stamp(&ours) != list {
+        out.push("its cursor list has changed".to_string());
+    }
+    let m = Manifest::parse(&list)?;
+    let now = shipped_now(&m, &read_glyphs(app_dir)?);
+    let before = shipped(p);
+    let mut ids: Vec<&str> =
+        now.iter().filter(|e| !before.contains(e)).chain(before.iter().filter(|e| !now.contains(e))).map(|(id, _)| id.as_str()).collect();
+    ids.sort_unstable();
+    ids.dedup();
+    if !ids.is_empty() {
+        out.push(format!("its glyphs have changed ({})", ids.join(", ")));
+    }
+    Ok(out)
 }
 
 /// The fingerprint recorded for a changed cursor that had no drawing yet.
@@ -108,14 +243,6 @@ fn record_changes(p: &Project, now: &[String], changed: &[String]) -> Result<(),
     write(&p.changed(), &text)
 }
 
-/// Has the app's cursor list changed since the project was last pulled? `None` when the app
-/// checkout isn't known or can't be read.
-pub fn stale(p: &Project) -> Option<bool> {
-    let app = std::fs::read_to_string(p.app_dir()?.join(APP_MANIFEST)).ok()?;
-    let ours = std::fs::read_to_string(p.manifest()).ok()?;
-    Some(without_stamp(&ours) != app)
-}
-
 fn ids(m: &Manifest) -> Vec<String> {
     m.designer_cursors().map(|c| c.id.clone()).collect()
 }
@@ -132,13 +259,10 @@ fn git(dir: &Path, args: &[&str]) -> Option<String> {
 /// `VectorCraft 0.10.0 (a9faa901, 2026-10-13)`: the app, its version and the commit the list
 /// came from, with `-dirty` when the list has changes not committed yet.
 fn stamp(app: &str, app_dir: &Path) -> String {
-    let version = std::fs::read_to_string(app_dir.join("Cargo.toml"))
-        .ok()
-        .and_then(|t| t.parse::<toml::Table>().ok())
-        .and_then(|t| {
-            let ws = t.get("workspace").and_then(|w| w.get("package")).and_then(|p| p.get("version"));
-            ws.or_else(|| t.get("package").and_then(|p| p.get("version"))).and_then(|v| v.as_str()).map(String::from)
-        });
+    let version = std::fs::read_to_string(app_dir.join("Cargo.toml")).ok().and_then(|t| t.parse::<toml::Table>().ok()).and_then(|t| {
+        let ws = t.get("workspace").and_then(|w| w.get("package")).and_then(|p| p.get("version"));
+        ws.or_else(|| t.get("package").and_then(|p| p.get("version"))).and_then(|v| v.as_str()).map(String::from)
+    });
     let commit = git(app_dir, &["rev-parse", "--short", "HEAD"]).map(|hash| {
         let dirty = git(app_dir, &["status", "--porcelain", "--", APP_MANIFEST]).is_some_and(|s| !s.is_empty());
         let date = git(app_dir, &["log", "-1", "--format=%cs"]).unwrap_or_default();
@@ -158,6 +282,7 @@ fn stamp(app: &str, app_dir: &Path) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::app_glyphs::tests::{ENUM, file, nib};
     use crate::check;
     use crate::project::tests::root;
 
@@ -169,7 +294,21 @@ mod tests {
         std::fs::create_dir_all(a.join("crates/tools/src")).unwrap();
         std::fs::write(a.join(APP_MANIFEST), list).unwrap();
         std::fs::write(a.join("Cargo.toml"), "[workspace.package]\nversion = \"1.2.3\"\n").unwrap();
+        std::fs::write(a.join(ENUM_RS), ENUM).unwrap();
+        ship(&a, &[]);
         a
+    }
+
+    /// The app at `a` ships these glyphs (the round-trip checker's, under each id).
+    fn ship(a: &Path, ids: &[&str]) {
+        let rows: Vec<String> = ids.iter().map(|id| format!("    (Cursor::{id}, &{}),", crate::emit::const_name(id))).collect();
+        let consts: Vec<String> = ids.iter().map(|id| nib(id)).collect();
+        std::fs::create_dir_all(a.join(GLYPHS_RS).parent().unwrap()).unwrap();
+        std::fs::write(a.join(GLYPHS_RS), file(&rows.join("\n"), &consts)).unwrap();
+    }
+
+    fn up_to_date(p: &Project, a: &Path) -> bool {
+        behind(p, a).unwrap().is_empty()
     }
 
     #[test]
@@ -186,8 +325,8 @@ mod tests {
         let pulled = check::pulled(p);
         assert_eq!(pulled.manifest.unwrap().cursor.len(), 1);
         assert_eq!(pulled.stamp.as_deref(), Some(got.stamp.as_str()));
-        assert_eq!(stale(p), Some(false));
-        assert!(matches!(&got.seeded, Seeded::Skipped(why) if why.contains("no seed command")), "{:?}", got.seeded);
+        assert!(up_to_date(p, &a));
+        assert!(matches!(&got.seeded, Seeded::Skipped(why) if why.contains("git")), "not a git checkout, so no seeds: {:?}", got.seeded);
         let quiet = pull(&r, &[NO_SEEDS.into()]).unwrap();
         assert_eq!(quiet.seeded, Seeded::Skipped(NO_SEEDS.into()));
     }
@@ -199,20 +338,25 @@ mod tests {
         let first = pull(&r, &[a.display().to_string()]).unwrap();
         std::fs::write(first.project.svg_dir().join("Pen.svg"), "mine").unwrap();
         std::fs::write(first.project.notes(), "my notes").unwrap();
-        std::fs::write(a.join(APP_MANIFEST), "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso.\"]\nhotspot = \"Tip.\"\n").unwrap();
-        assert_eq!(stale(&first.project), Some(true));
+        std::fs::write(a.join(APP_MANIFEST), "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso.\"]\nhotspot = \"Tip.\"\n")
+            .unwrap();
+        assert_eq!(behind(&first.project, &a).unwrap(), ["its cursor list has changed"]);
         let again = pull(&r, &[]).unwrap();
         assert!(!again.first);
         assert_eq!((again.added, again.dropped), (vec!["Lasso".to_string()], vec!["Pen".to_string()]));
         assert_eq!(std::fs::read_to_string(again.project.svg_dir().join("Pen.svg")).unwrap(), "mine");
         assert_eq!(std::fs::read_to_string(again.project.notes()).unwrap(), "my notes");
-        assert_eq!(stale(&again.project), Some(false));
+        assert!(up_to_date(&again.project, &a));
     }
 
     #[test]
     fn a_pull_records_changed_descriptions_until_their_drawing_changes() {
         let r = root("pull-changed");
-        let both = |pen: &str| format!("app = \"TestCraft\"\n\n[[cursor]]\nid = \"Pen\"\nshown_when = [\"{pen}\"]\nhotspot = \"Tip.\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso.\"]\nhotspot = \"Tip.\"\n");
+        let both = |pen: &str| {
+            format!(
+                "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Pen\"\nshown_when = [\"{pen}\"]\nhotspot = \"Tip.\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso.\"]\nhotspot = \"Tip.\"\n"
+            )
+        };
         let a = app(&r, &both("Pen."));
         let first = pull(&r, &[a.display().to_string()]).unwrap();
         assert!(first.changed.is_empty() && changes(&first.project).is_empty());
@@ -227,7 +371,11 @@ mod tests {
         let same = pull(&r, &[]).unwrap();
         assert!(same.changed.is_empty());
         assert_eq!(changes(&same.project).len(), 1);
-        std::fs::write(a.join(APP_MANIFEST), "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso, changed.\"]\nhotspot = \"Tip.\"\n").unwrap();
+        std::fs::write(
+            a.join(APP_MANIFEST),
+            "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso, changed.\"]\nhotspot = \"Tip.\"\n",
+        )
+        .unwrap();
         let gone = pull(&r, &[]).unwrap();
         assert_eq!(gone.changed, ["Lasso"]);
         assert_eq!(changes(&gone.project), [("Lasso".to_string(), NOT_DRAWN.to_string())]);
@@ -238,6 +386,48 @@ mod tests {
         std::fs::write(a.join(APP_MANIFEST), "app = \"TestCraft\"\n\n[[cursor]]\nid = \"Lasso\"\nshown_when = [\"Lasso, changed.\"]\nhotspot = \"Tip.\"\n\n[[cursor]]\nid = \"Knife\"\nshown_when = [\"Knife.\"]\nhotspot = \"Tip.\"\n").unwrap();
         let renamed = pull(&r, &[]).unwrap();
         assert_eq!((renamed.added.clone(), renamed.changed.clone()), (vec!["Knife".to_string()], vec!["Knife".to_string()]));
+    }
+
+    #[test]
+    fn the_app_is_the_source_of_truth_for_what_it_ships() {
+        let r = root("pull-sync");
+        let a = app(&r, LIST);
+        ship(&a, &["Pen"]);
+        let first = pull(&r, &[a.display().to_string(), NO_SEEDS.into()]).unwrap();
+        let p = &first.project;
+        let pen = p.svg_dir().join("Pen.svg");
+        assert_eq!(first.synced, Synced { written: vec!["Pen".into()], ..Synced::default() });
+        let g = read_glyphs(&a).unwrap();
+        assert!(app_glyphs::same(&std::fs::read(&pen).unwrap(), g.get("Pen").unwrap()));
+        assert_eq!(shipped(p), [("Pen".to_string(), g.get("Pen").unwrap().fingerprint())]);
+
+        // The designer's work on a glyph the app hasn't changed is kept.
+        let mine = String::from_utf8(include_bytes!("../testdata/round-trip-checker.svg").to_vec()).unwrap();
+        let mine = mine.replacen("</svg>", "<path d=\"M20 20 L22 20 L22 22 Z\" fill=\"#000000\"/></svg>", 1);
+        std::fs::write(&pen, &mine).unwrap();
+        let kept = pull(&r, &[NO_SEEDS.into()]).unwrap();
+        assert_eq!(kept.synced, Synced::default());
+        assert_eq!(std::fs::read_to_string(&pen).unwrap(), mine);
+
+        // The app's glyph changed elsewhere: the app wins.
+        let changed = file("    (Cursor::Pen, &PEN),", &[nib("Pen").replacen("(0.0, 0.0)", "(0.5, 0.0)", 1)]);
+        std::fs::write(a.join(GLYPHS_RS), changed).unwrap();
+        assert_eq!(behind(p, &a).unwrap(), ["its glyphs have changed (Pen)"]);
+        let replaced = pull(&r, &[NO_SEEDS.into()]).unwrap();
+        assert_eq!(replaced.synced, Synced { replaced: vec!["Pen".into()], ..Synced::default() });
+        assert!(app_glyphs::same(&std::fs::read(&pen).unwrap(), read_glyphs(&a).unwrap().get("Pen").unwrap()));
+        assert!(up_to_date(p, &a));
+
+        // The app stopped shipping it: the drawing goes.
+        ship(&a, &[]);
+        let removed = pull(&r, &[NO_SEEDS.into()]).unwrap();
+        assert_eq!(removed.synced, Synced { removed: vec!["Pen".into()], ..Synced::default() });
+        assert!(!pen.exists() && shipped(p).is_empty());
+
+        // A drawing the app never shipped is the designer's.
+        std::fs::write(&pen, &mine).unwrap();
+        assert_eq!(pull(&r, &[NO_SEEDS.into()]).unwrap().synced, Synced::default());
+        assert!(pen.exists());
     }
 
     #[test]

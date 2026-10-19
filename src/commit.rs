@@ -1,14 +1,14 @@
-//! Committing a handed-over project, so the app gets a saved version: `ready` stages and commits
-//! the project folder, and only that folder, with a message saying what changed.
+//! Committing a pushed project, so what the app got is saved: `push` stages and commits the
+//! project folder, and only that folder, with a message saying what changed in the app.
 
-use crate::handoff::Changes;
+use crate::push::Changes;
 use std::path::Path;
 use std::process::Command;
 
-/// The commit message for handing over the project `name`: a conventional-commit subject with the
+/// The commit message for pushing the project `name`: a conventional-commit subject with the
 /// counts, then one `Kind: A, B` line per kind of change.
 pub fn message(name: &str, changes: &Changes) -> String {
-    let counts: Vec<String> = [("new", &changes.new), ("redrawn", &changes.redrawn), ("removed", &changes.removed)]
+    let counts: Vec<String> = [("new", &changes.new), ("redrawn", &changes.redrawn), ("unwired", &changes.unwired)]
         .iter()
         .filter(|(_, files)| !files.is_empty())
         .map(|(kind, files)| format!("{} {kind}", files.len()))
@@ -16,7 +16,7 @@ pub fn message(name: &str, changes: &Changes) -> String {
     if counts.is_empty() {
         return format!("chore: update {name} cursor folder\n");
     }
-    format!("feat: hand over {name} cursors ({})\n\n{}\n", counts.join(", "), changes.lines().join("\n"))
+    format!("feat: push {name} cursors ({})\n\n{}\n", counts.join(", "), changes.lines().join("\n"))
 }
 
 /// Run git in `folder`, returning its stdout, or its stderr as the error.
@@ -27,6 +27,11 @@ fn git(folder: &Path, args: &[&str]) -> Result<String, String> {
     } else {
         Err(format!("git {} failed: {}", args.join(" "), String::from_utf8_lossy(&out.stderr).trim()))
     }
+}
+
+/// The name git commits under in `folder` (`git config user.name`): who drew what a push hands over.
+pub fn author(folder: &Path) -> Option<String> {
+    git(folder, &["config", "user.name"]).ok().filter(|n| !n.is_empty())
 }
 
 /// What `commit` did.
@@ -62,7 +67,7 @@ mod tests {
     #[test]
     fn message_counts_and_lists_the_changes() {
         let c = Changes { new: vec!["A".into(), "B".into()], redrawn: vec!["Pen".into()], ..Changes::default() };
-        assert_eq!(message("vectorcraft", &c), "feat: hand over vectorcraft cursors (2 new, 1 redrawn)\n\nNew: A, B\nRedrawn: Pen\n");
+        assert_eq!(message("vectorcraft", &c), "feat: push vectorcraft cursors (2 new, 1 redrawn)\n\nNew: A, B\nRedrawn: Pen\n");
         assert_eq!(message("vectorcraft", &Changes::default()), "chore: update vectorcraft cursor folder\n");
     }
 

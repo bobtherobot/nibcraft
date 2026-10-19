@@ -1,13 +1,19 @@
 # nibcraft
 
-Turns cursor designs drawn as SVG into Rust glyph data for VectorCraft's
-`crates/ui-egui/src/cursors.rs`. VectorCraft draws its cursors from code; the SVGs here are their
-editable sources.
+Turns cursor designs drawn as SVG into Rust glyph data for VectorCraft
+(`crates/ui-egui/src/cursors/glyphs.rs`). VectorCraft draws its cursors from that data; the SVGs
+here are their editable sources.
 
-**VectorCraft decides which cursors exist and what each is for; designers draw them.** VectorCraft
-keeps its cursor list (`crates/tools/src/cursors.toml`: every cursor's id, when it shows and where
-its hotspot is). nibcraft copies that list in and shows what's drawn and what's left. Nothing
-a designer writes changes what a cursor is for.
+**VectorCraft is the source of truth: it decides which cursors exist and what each is for, and
+what it ships is what `pull` gives you.** VectorCraft keeps its cursor list
+(`crates/tools/src/cursors.toml`: every cursor's id, when it shows and where its hotspot is).
+nibcraft copies that list in and shows what's drawn and what's left. Nothing a designer writes
+changes what a cursor is for.
+
+**VectorCraft knows nothing of nibcraft.** nibcraft is a separate tool: it reads VectorCraft's
+checkout (the cursor list, the `Cursor` values in `crates/tools/src/lib.rs`, the generated glyphs)
+and writes only the generated part of `glyphs.rs`. The workflow is pull → draw → push → rebuild
+VectorCraft.
 
 
 ## Project Structure
@@ -23,7 +29,7 @@ Each app gets a folder under the "projects" folder (`projects/vectorcraft/`), an
 
 - **.nibcraft/ (hidden sub-folder)** - nibcraft's own files. Don't edit or delete them (except a line of `changed`, see Step 2):
    - `cursors.toml` - VectorCraft's cursor list as of your last pull
-   - `handoff` - what your last `ready` handed over
+   - `shipped` - VectorCraft's glyphs as of your last pull or push: how `pull` tells your work from VectorCraft's changes
    - `changed` - the cursors whose description changed after you drew them (see Step 2)
    - `pull-from` - where VectorCraft lives on this computer (local only, not committed)
 
@@ -37,7 +43,9 @@ Some cursors VectorCraft already draws itself, in its own code, before any desig
 cp projects/vectorcraft/svg/Crosshair-vectorcraft-rendered.svg projects/vectorcraft/svg/Crosshair.svg
 ```
 
-Once a cursor has a drawing, `pull` leaves its old seed alone. Keep it as a reference or delete it: VectorCraft ignores seeds either way.
+Once a cursor is drawn, here or in VectorCraft, the next `pull` deletes its seed.
+
+To make seeds, nibcraft builds VectorCraft's own cursor-drawing code in a scratch copy of your VectorCraft checkout (a git worktree under nibcraft's `target/seeds/`, uncommitted changes to tracked files included), with a small test of nibcraft's own (`runtime/vectorcraft_seeds.rs`) dropped in. Your VectorCraft checkout isn't changed; `git worktree list` there shows the scratch copy.
 
 ## Workflow
 
@@ -57,11 +65,16 @@ cargo run -- pull ../vectorcraft
 This sets up and synchronizes NibCraft with VectorCraft on your system:
    - Remembers where VectorCraft lives on your system.
    - Gets VectorCraft's cursor list.
-   - Creates the project folder (with an empty `svg/` folder) the first time.
+   - Creates the project folder the first time.
    - Makes it the current project you are working on.
-   - Writes the seeds. To do that it builds VectorCraft, so the first pull takes a few minutes: you'll see VectorCraft's build scroll by. Later pulls are quick. Add `--no-seeds` to skip this. (Building means running VectorCraft's own code, so only pull from a VectorCraft checkout you trust.)
+   - Writes every cursor VectorCraft ships as a drawing (`svg/<ID>.svg`), from its glyph data.
+   - Writes the seeds. To do that it builds VectorCraft, so the first pull takes a few minutes: you'll see VectorCraft's build scroll by. Later pulls are quicker. Add `--no-seeds` to skip this. (Building means running VectorCraft's own code, so only pull from a VectorCraft checkout you trust.)
 
-The "pull" command writes `CURSORS.md`, which lists every cursor and its status, and prints which cursors were added to or dropped from the list since the last pull, and whose descriptions changed. It never touches your drawings: a dropped cursor's drawing stays in `svg/` and is ignored.
+The "pull" command writes `CURSORS.md`, which lists every cursor and its status, and prints which cursors were added to or dropped from the list since the last pull, and whose descriptions changed. A dropped cursor's drawing stays in `svg/` and is ignored.
+
+**VectorCraft wins.** A drawing that differs from what VectorCraft ships is kept only while VectorCraft's glyph for it hasn't changed since your last pull or push: that's your work in progress. When someone else changes that glyph in VectorCraft, `pull` replaces your drawing with VectorCraft's, and when VectorCraft stops shipping one, `pull` deletes its drawing. So **commit your project as you go** (`git commit projects/vectorcraft`): anything replaced is then still in git.
+
+Drawings written from VectorCraft's data are straight segments only (VectorCraft keeps points, not curves). A drawing of yours that gives exactly VectorCraft's glyph, curves and all, is left as you drew it.
 
 Whenever you update the VectorCraft repo (e.g. to get the latest version), you can just run:
 
@@ -122,49 +135,23 @@ The "To do" column lists **[m] missing** cursors (no drawing yet), **[f] fix** i
 
 It also refreshes `CURSORS.md`, and notes when VectorCraft's list has changed since your last pull.
 
-A drawing of a listed cursor that doesn't convert is a problem; `check` fails until it's fixed. Nothing else is: a changed cursor doesn't stop a handoff.
+A drawing of a listed cursor that doesn't convert is a problem; `check` fails until it's fixed. Nothing else is: a changed cursor doesn't stop a push.
 
-### Step 4 - Hand over
-When you're happy with your work and ready to integrate the cursors, prepare and finalize your work here in NibCraft so the updates can go into VectorCraft.
-
-First, run the `ready` command to finalize your work:
+### Step 4 - Push
+When you're happy with your work, push it into VectorCraft:
 
 ```sh
-cargo run -q -- ready
+cargo run -q -- push
 ```
 
-The `ready` command does the following:
-- Does a check
-- Records what it hands over (`projects/vectorcraft/.nibcraft/handoff`)
-- Commits the project folder (only that folder; it doesn't push)
-- Lists what's new, redrawn or removed since the last handoff
+The `push` command:
+- Does a check, and stops if there are problems.
+- Stops if VectorCraft has changed since your last pull (its cursor list or its glyphs): pull first (commit before, to keep your drawings), then push.
+- Rewrites the generated part of `crates/ui-egui/src/cursors/glyphs.rs` in the VectorCraft checkout you pulled from (or `push PATH/TO/VECTORCRAFT`), and nothing else there. A drawing that gives exactly what VectorCraft ships keeps VectorCraft's code as it is, author included; a new or redrawn one is written with your name (`git config user.name`). A cursor VectorCraft ships but you no longer have a drawing of is unwired: VectorCraft draws it its own way again.
+- Commits the project folder (only that folder; it doesn't `git push`).
+- Lists what's new, redrawn or unwired, and your `DESIGNER_NOTES.md` to pass on to VectorCraft's developers.
 
-When the `ready` command finishes, it prints the command that needs to be run from the VectorCraft project.
-
-**Next, we'll move over to the VectorCraft project**
-
-From this point onward, you'll work in the VectorCraft project the way you normally do development work in VectorCraft.
-
-So you'll point your terminal (`cd`) to the VectorCraft folder:
-
-```sh
-cd path/to/VectorCraft
-```
-
-Then run the command the `ready` command gave you, which will be something like:
-
-```sh
-cargo xtask cursors /path/to/nibcraft
-```
-
-This brings your drawn cursors into the VectorCraft project, and shows VectorCraft's developers your `DESIGNER_NOTES.md`.
-
-**FYI**: behind the scenes, `cargo xtask cursors` runs one NibCraft command for you. You never need to run it yourself:
-
-```sh
-# Converts the drawn cursors, and reports the ones not drawn yet, drawings that don't convert, and DESIGNER_NOTES.md
-cargo run -q -- glyphs vectorcraft Pen PenAdd Lasso
-```
+Then rebuild VectorCraft to see your cursors. The change to `glyphs.rs` is an ordinary edit in the VectorCraft checkout: commit it there like any other change (a new cursor's ID needs a `Cursor` value in VectorCraft first; push says so).
 
 ### Other Commands
 
@@ -180,14 +167,11 @@ The `use` command switches projects (for now we only have VectorCraft)
 cargo run -q -- use NAME
 ```
 
-Developer tools (designers don't need these):
+Developer tool (designers don't need it):
 
 ```sh
 # Print one drawing's generated Rust glyph
 cargo run -q -- gen projects/vectorcraft/svg/Pen.svg
-
-# Print the glyph-drawing code (draw_glyph()) VectorCraft pastes into cursors.rs when it changes
-cargo run -q -- runtime
 ```
 
 
@@ -201,17 +185,19 @@ cargo test
 - `src/geom.rs`: flattening, convexity and ear-clipping triangulation.
 - `src/emit.rs`: writes the Rust.
 - `src/manifest.rs`: reads an app's cursor list.
-- `src/pull.rs`: `pull`, copying the cursor list into its project and recording the cursors whose description changed (`.nibcraft/changed`).
-- `src/seeds.rs`: `pull`'s seeds: runs the command the app's cursor list names (`seeds = [...]`) and writes what it draws as `<id>-<app>-rendered.svg`.
+- `src/app_glyphs.rs`: VectorCraft's side, read and written from outside: its `Cursor` values, its generated glyphs, and a glyph as an SVG.
+- `src/pull.rs`: `pull`, copying the cursor list in, bringing the drawings level with VectorCraft (`.nibcraft/shipped`), and recording the cursors whose description changed (`.nibcraft/changed`).
+- `src/seeds.rs`: `pull`'s seeds: builds VectorCraft in a scratch worktree with `runtime/vectorcraft_seeds.rs` dropped in, and writes what it draws as `<id>-<app>-rendered.svg`.
+- `src/push.rs`: `push`, rewriting the generated part of VectorCraft's `glyphs.rs`.
 - `src/check.rs`: the `check` precheck of a project against its cursor list.
 - `src/cursors_md.rs`: writes `CURSORS.md`.
-- `src/glyphs.rs`: `glyphs`, the app sync's JSON.
 - `src/notes.rs`: `DESIGNER_NOTES.md`'s template and vendor-name warning.
 - `src/preview.rs`: the HTML swatch book.
-- `src/handoff.rs`: `ready`'s handoff record, change list and instructions.
-- `src/commit.rs`: `ready`'s commit of the project folder.
-- `src/project.rs`: projects, their files (and moving `.nibcraft/`'s files from where older versions kept them) and the current project (`projects`, `use`).
-- `runtime/glyph.rs`: the code pasted into `cursors.rs`.
+- `src/commit.rs`: `push`'s commit of the project folder.
+- `src/project.rs`: projects, their files and the current project (`projects`, `use`).
+- `runtime/vectorcraft_seeds.rs`: the test `pull` drops into VectorCraft's `cursors` module to draw the seeds. When VectorCraft's drawing code changes shape, it follows.
+
+`NIBCRAFT_APP=/path/to/vectorcraft cargo test -- --ignored` also checks that every glyph VectorCraft ships reads back the same from the SVG `pull` writes for it.
 
 `testdata/round-trip-checker.svg` is the round-trip check: it redraws `cursors.rs`'s `pen()` nib. Its glyph matches the hand-written one, except that the stem's halo no longer cuts into the nib; `cargo test` checks that it still converts to `pen()`'s numbers.
 

@@ -15,7 +15,7 @@ pub struct Report {
     pub cards: Vec<Card>,
     /// Drawings in `svg/` the app doesn't ask for, by name.
     pub extras: Vec<Card>,
-    /// What stops a handoff, in plain words.
+    /// What stops a push, in plain words.
     pub problems: Vec<String>,
     /// What's left for the designer.
     pub todos: Vec<Todo>,
@@ -93,7 +93,7 @@ pub fn assess(manifest: Result<&Manifest, String>, svgs: Vec<(String, Vec<u8>)>)
 }
 
 /// Mark the drawn cursors of `m` whose description changed in a pull (`record`: id and the
-/// drawing's fingerprint then) and whose drawing hasn't changed since. Doesn't stop a handoff.
+/// drawing's fingerprint then) and whose drawing hasn't changed since. Doesn't stop a push.
 pub fn mark_changed(r: &mut Report, m: &Manifest, record: &[(String, String)], svgs: &[(String, Vec<u8>)]) {
     for c in m.designer_cursors() {
         let file = format!("{}.svg", c.id);
@@ -165,7 +165,7 @@ mod changed_tests {
         mark_changed(&mut r, &m, &record, &svgs);
         let changed: Vec<&str> = r.todos.iter().filter(|t| t.kind == TodoKind::Changed).map(|t| t.id.as_str()).collect();
         assert_eq!(changed, ["Pen"]);
-        assert!(r.problems.is_empty(), "a changed description doesn't stop a handoff");
+        assert!(r.problems.is_empty(), "a changed description doesn't stop a push");
     }
 }
 

@@ -10,7 +10,8 @@
 //!     DESIGNER_NOTES.md  the designer's notes for the app's developers
 //!     .nibcraft/      nibcraft's own files, never edited by hand:
 //!         cursors.toml   the app's cursor list as last pulled (committed, so `check` works anywhere)
-//!         handoff        what the last `ready` handed over (committed)
+//!         shipped        the app's glyphs as of the last pull or push (committed): which drawings
+//!                        are the designer's work and which the app changed since
 //!         pull-from      where the app's checkout is on this machine (local, gitignored)
 
 use std::path::{Path, PathBuf};
@@ -57,8 +58,9 @@ impl Project {
     pub fn pull_from(&self) -> PathBuf {
         self.state_dir().join("pull-from")
     }
-    pub fn handoff(&self) -> PathBuf {
-        self.state_dir().join("handoff")
+    /// The app's glyphs as of the last pull or push ([`crate::pull::shipped`]).
+    pub fn shipped(&self) -> PathBuf {
+        self.state_dir().join("shipped")
     }
     /// The cursors whose description changed in a pull, until their drawing changes ([`crate::pull::changes`]).
     pub fn changed(&self) -> PathBuf {

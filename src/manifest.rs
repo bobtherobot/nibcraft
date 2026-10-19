@@ -11,9 +11,6 @@ pub const APP_MANIFEST: &str = "crates/tools/src/cursors.toml";
 pub struct Manifest {
     /// The app's name as it's written (`VectorCraft`).
     pub app: Option<String>,
-    /// The command, run in the app's checkout, that writes the cursors the app draws in its own
-    /// code as `<id>.svg` into the folder added after it (`pull` turns them into seeds).
-    pub seeds: Option<Vec<String>>,
     #[serde(default)]
     pub cursor: Vec<Cursor>,
     #[serde(default)]
